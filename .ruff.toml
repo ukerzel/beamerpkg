@@ -1,0 +1,6 @@
+target-version = "py311"
+line-length = 88
+src = ["src", "tests"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82", "E402", "RUF100", "PGH003", "PGH004"]

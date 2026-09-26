@@ -97,7 +97,7 @@ the directory alive until the presenter exits.
 ## Demo
 
 The demo intentionally mixes equations, TikZ, columns, overlays, and video.
-A repository-friendly H.264/AAC transcode of the supplied 1280x720 test video and a poster frame are committed under `examples/media/`. Build the PDF/package with:
+A repository-friendly H.264 transcode of the supplied 1280x720 test video and a poster frame are committed under `examples/media/`. Build the PDF/package with:
 
 ```bash
 ./examples/build_demo.sh

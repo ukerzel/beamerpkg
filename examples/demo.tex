@@ -1,0 +1,56 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{beamerpkg}
+
+\title{beamerpkg MVP}
+\author{Demo}
+\date{}
+
+\begin{document}
+
+\begin{frame}{Normal Beamer stays normal}
+  \begin{columns}[T]
+    \column{0.48\textwidth}
+      \begin{block}{Equation}
+      \[
+        \frac{\partial c}{\partial t} = \nabla\!\cdot\!\left(M\nabla\mu\right)
+      \]
+      \end{block}
+      \pause
+      \begin{itemize}
+        \item equations remain vector PDF;
+        \item overlays remain Beamer pages;
+        \item TikZ remains TikZ.
+      \end{itemize}
+    \column{0.48\textwidth}
+      \begin{tikzpicture}[scale=0.8]
+        \draw[->] (0,0) -- (4,0) node[right] {$x$};
+        \draw[->] (0,0) -- (0,3) node[above] {$y$};
+        \draw[thick] (0.3,0.4) .. controls (1.5,2.8) and (2.5,0.2) .. (3.7,2.4);
+      \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{External video, TeX-defined geometry}
+  \begin{columns}
+    \column{0.42\textwidth}
+      The video rectangle is the normal Beamer box. The PDF contains the movie
+      annotation; the package only guarantees that the referenced relative path
+      exists when presenting.
+    \column{0.54\textwidth}
+      \pkgmovie[loop,showcontrols]
+        {\includegraphics[width=\linewidth]{media/video-poster.jpg}}
+        {media/video.mp4}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Back to ordinary overlays}
+  \centering
+  \only<1>{Static PDF content.}
+  \only<2>{No HTML renderer involved.}
+  \only<3>{The media layer has not changed slide rendering.}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,19 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerpkg}[2026/09/26 v0.1 Record Beamer movie assets]
+
+\RequirePackage{multimedia}
+
+\newwrite\beamerpkgassetfile
+\immediate\openout\beamerpkgassetfile=\jobname.beamerpkg-assets
+\AtEndDocument{\immediate\closeout\beamerpkgassetfile}
+
+% MVP wrapper: preserve Beamer's own movie annotation/layout and merely record
+% the external media path for packaging. Deliberately no interception of \movie
+% yet; that can be evaluated after the container/path-resolution idea is proven.
+\newcommand{\pkgmovie}[3][]{%
+  \begingroup
+  \edef\beamerpkgassetpath{\detokenize{#3}}%
+  \immediate\write\beamerpkgassetfile{\beamerpkgassetpath}%
+  \endgroup
+  \movie[#1]{#2}{#3}%
+}
