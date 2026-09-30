@@ -23,6 +23,10 @@ H.264 video in the TeX-defined rectangle. Running the PDF directly through pdfpc
 gave the same behavior, confirming that beamerpkg is only the transport/path
 layer.
 
+The demo now uses the full 1280x720 test video
+`examples/media/gemini_generated_video_b2693757.mp4` and the full-size
+`video-poster_big.png`.
+
 See [`docs/MVP.md`](docs/MVP.md) for the recorded acceptance test and
 [`docs/NEXT_STEPS.md`](docs/NEXT_STEPS.md) for the next spike.
 
@@ -52,25 +56,32 @@ poetry install
 
 Runtime code intentionally uses only the Python standard library.
 
-## Current MVP authoring route
+## Authoring
 
-The first MVP uses the small helper package `tex/beamerpkg.sty` and
-`\pkgmovie` where a normal Beamer `\movie` would be used:
+The portable helper remains standard Beamer multimedia:
 
 ```latex
-\usepackage{beamerpkg}
-
 \pkgmovie[loop,showcontrols]
   {\includegraphics[width=\linewidth]{media/poster.png}}
-  {media/simulation.mp4}
+  {media/video.mp4}
 ```
 
-The macro delegates the PDF movie annotation and geometry to Beamer's
-`multimedia` package and records the media path in
-`<jobname>.beamerpkg-assets`.
+With pdfpc this is click-to-play.
 
-The next spike is to discover standard `\movie` references directly from the
-PDF so this helper is no longer required.
+For pdfpc-specific autoplay, the helper deliberately uses a separate command:
+
+```latex
+\pkgpdfpcmovie[autostart&loop]
+  {\includegraphics[width=\linewidth]{media/poster.png}}
+  {media/video.mp4}
+```
+
+This emits pdfpc's `run:` launch link. It is intentionally not treated as a
+portable PDF multimedia feature or part of the container format.
+
+The next architecture spike is still to discover standard `\movie` references
+directly from the PDF so the helper is unnecessary for ordinary click-to-play
+movies.
 
 ## Package
 
@@ -101,18 +112,17 @@ With `pdfpc` and the required GStreamer codecs installed:
 poetry run beamerpkg present talk.beamerpkg
 ```
 
-The poster is click-to-play with the current pdfpc movie-annotation path.
-
 `beamerpkg` validates the archive, extracts it to a temporary directory while
 preserving all relative paths, launches `pdfpc` from that directory, and keeps
 the directory alive until the presenter exits.
 
 ## Demo
 
-The demo mixes equations, TikZ, columns, overlays, and video. A
-repository-friendly H.264 test video and poster are under `examples/media/`.
-
 ```bash
+git pull --rebase
 ./examples/build_demo.sh
 poetry run beamerpkg present examples/demo.beamerpkg
 ```
+
+Entering the video slide should automatically start and loop the full-size
+packaged video in pdfpc. Outside pdfpc, the poster remains the static fallback.

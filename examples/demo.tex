@@ -33,16 +33,16 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{External video, TeX-defined geometry}
+\begin{frame}{Autoplay video (pdfpc-specific)}
   \begin{columns}
-    \column{0.42\textwidth}
-      The video rectangle is the normal Beamer box. The PDF contains the movie
-      annotation; the package only guarantees that the referenced relative path
-      exists when presenting.
-    \column{0.54\textwidth}
-      \pkgmovie[loop,showcontrols]
-        {\includegraphics[width=\linewidth]{media/video-poster.jpg}}
-        {media/video.mp4}
+    \column{0.38\textwidth}
+      The slide itself is still ordinary Beamer/PDF. For this demo, pdfpc's
+      \texttt{run:} link mechanism starts the packaged full-resolution video
+      automatically and loops it while the slide is shown.
+    \column{0.58\textwidth}
+      \pkgpdfpcmovie[autostart&loop]
+        {\includegraphics[width=\linewidth]{media/video-poster_big.png}}
+        {media/gemini_generated_video_b2693757.mp4}
   \end{columns}
 \end{frame}
 

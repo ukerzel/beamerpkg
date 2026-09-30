@@ -5,7 +5,7 @@ PDF relocatable without replacing Beamer/PDF rendering.
 
 The remaining work should stay incremental.
 
-## 1. Next spike: wrapperless media discovery
+## 1. Next architecture spike: wrapperless media discovery
 
 ### Goal
 
@@ -59,8 +59,8 @@ asset-path pipeline.
 
 ## 2. Presenter ergonomics
 
-After wrapperless packing, allow presenter arguments to pass through without
-inventing platform-specific policy, for example:
+After wrapperless packing, allow presenter arguments to pass through, for
+example:
 
 ```bash
 beamerpkg present talk.beamerpkg -- -S -w both
@@ -69,12 +69,25 @@ beamerpkg present talk.beamerpkg -- -S -w both
 This is useful for rehearsal, WSL/WSLg, and unusual display setups while keeping
 pdfpc responsible for presentation semantics.
 
-## 3. Autoplay
+## 3. Autoplay experiment
 
-Treat autoplay as a separate viewer-capability experiment. The validated
-container does not need autoplay to work, and pdfpc's standard movie-annotation
-behavior is click-to-play. Do not encode autoplay hacks into the container
-format unless a portable viewer mechanism is demonstrated.
+The demo now contains an explicit pdfpc-only autoplay path using:
+
+```latex
+\pkgpdfpcmovie[autostart&loop]{poster}{media/video.mp4}
+```
+
+This maps to pdfpc's `run:...?...autostart` launch-link mechanism. It is kept
+separate from the portable standard `\movie` path and does not change the
+container schema.
+
+The local LaTeX smoke test confirms that the resulting PDF contains a `/Launch`
+annotation targeting the full video with `?autostart&loop`. The remaining
+evidence is a real pdfpc run confirming that playback starts automatically on
+slide entry.
+
+Do not generalize this into a portable autoplay abstraction unless another
+viewer-compatible mechanism is demonstrated.
 
 ## 4. Desktop/file association
 

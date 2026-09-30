@@ -5,6 +5,10 @@
 The original MVP objective — validate the `PDF + relative media paths + ZIP
 container + pdfpc` architecture — is complete.
 
+The next architecture spike remains wrapperless discovery of standard Beamer
+movie annotations. A separate pdfpc-specific autoplay experiment has been added
+to the demo at user request.
+
 ## MVP result
 
 **Validated on 2026-09-30 under WSL/WSLg with pdfpc.**
@@ -21,8 +25,17 @@ Observed end-to-end behavior:
   behavior, confirming that the package layer adds no rendering-specific
   behavior.
 
-The static poster before a click is normal pdfpc behavior for this annotation
-path, not a beamerpkg failure.
+## Current demo
+
+The demo now uses the full-size repository assets:
+
+- `examples/media/gemini_generated_video_b2693757.mp4` (~7.85 MB);
+- `examples/media/video-poster_big.png` (~2.64 MB).
+
+The video slide uses a pdfpc-specific launch link with `autostart&loop`.
+A local compile confirmed that the PDF contains the expected `/Launch`
+annotation and that the asset sidecar still records the video path without query
+options. Real pdfpc autoplay behavior is awaiting the next user run.
 
 ## Implemented
 
@@ -30,17 +43,19 @@ path, not a beamerpkg failure.
 - `beamerpkg pack`.
 - `beamerpkg inspect` with size/SHA-256 verification.
 - `beamerpkg present` using a temporary restored filesystem context.
-- `beamerpkg.sty` with explicit `\pkgmovie` asset recording.
-- Beamer demo with equations, TikZ, columns, overlays, poster image, and MP4.
+- portable `\pkgmovie` helper for standard Beamer movie annotations.
+- separate `\pkgpdfpcmovie` helper for pdfpc-specific launch-link options such
+  as autoplay.
+- Beamer demo with equations, TikZ, columns, overlays, full-size poster, and
+  full-size MP4.
 - focused tests for relocation, integrity, traversal rejection, and presenter
   working-directory behavior.
-- successful real pdfpc/GStreamer playback test.
+- successful real pdfpc/GStreamer click-to-play test.
 
-## Next spike
+## Next architecture spike
 
 Remove the project-specific `\pkgmovie` authoring requirement by discovering
 standard Beamer `\movie` media references directly from PDF annotations during
 `beamerpkg pack`.
 
-Do not start autoplay, GUI/file-association work, or a new renderer in the same
-change. See `docs/NEXT_STEPS.md`.
+See `docs/NEXT_STEPS.md`.
