@@ -23,6 +23,11 @@ rm -f demo.beamerpkg-assets
 poetry -C "$REPO_ROOT" run beamerpkg pack \
   "$SCRIPT_DIR/demo.pdf" \
   --root "$SCRIPT_DIR" \
+  --source-root "$REPO_ROOT" \
+  --source "examples/demo.tex" \
+  --source "examples/media/gemini_generated_video_b2693757.mp4" \
+  --source "examples/media/video-poster_big.png" \
+  --source "tex/beamerpkg.sty" \
   --output "$SCRIPT_DIR/demo.beamerpkg"
 
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
@@ -30,6 +35,10 @@ pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
 poetry -C "$REPO_ROOT" run beamerpkg pack \
   "$SCRIPT_DIR/wrapperless.pdf" \
   --root "$SCRIPT_DIR" \
+  --source-root "$REPO_ROOT" \
+  --source "examples/wrapperless.tex" \
+  --source "examples/media/gemini_generated_video_b2693757.mp4" \
+  --source "examples/media/video-poster_big.png" \
   --output "$SCRIPT_DIR/wrapperless.beamerpkg"
 
 echo "Created examples/demo.beamerpkg and examples/wrapperless.beamerpkg"
