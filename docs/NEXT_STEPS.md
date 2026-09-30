@@ -17,19 +17,19 @@ pdfpc
 The legacy `.beamerpkg-assets` route remains only as an explicit/fallback
 compatibility path.
 
-## 1. Presenter ergonomics
+## Completed: presenter argument passthrough
 
-Allow pdfpc arguments to pass through without inventing platform-specific policy,
-for example:
+Arguments after `--` are forwarded verbatim to pdfpc before the extracted PDF
+filename. For example, a one-monitor setup can request both pdfpc windows with:
 
 ```bash
-beamerpkg present talk.beamerpkg -- -S -w both
+beamerpkg present talk.beamerpkg -- -w both
 ```
 
-This is useful for rehearsal, WSL/WSLg, and unusual display setups while keeping
-pdfpc responsible for presentation semantics.
+This keeps display policy in pdfpc while preserving `.beamerpkg` as the launch
+artifact.
 
-## 2. Autoplay compatibility
+## 1. Autoplay compatibility
 
 The current demo has a working pdfpc-specific autoplay path:
 
@@ -44,13 +44,13 @@ PDF launch actions are ignored rather than packaged.
 Keep this separate from standard `\movie`: autoplay is a viewer capability,
 not a container property.
 
-## 3. Desktop/file association
+## 2. Desktop/file association
 
 After the CLI stabilizes, associate `.beamerpkg` with a thin launcher on
 Linux/macOS/Windows. This should call the same validation/extraction code rather
 than introduce a second application architecture.
 
-## 4. Packaging/release polish
+## 3. Packaging/release polish
 
 - generate and commit a Poetry lock file from a Poetry-enabled development
   machine;

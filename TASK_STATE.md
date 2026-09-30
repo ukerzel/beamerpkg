@@ -31,12 +31,20 @@ Local evidence: 10 focused tests pass, Python compilation succeeds, and real
 pdflatex output for both annotation forms packages the full 7.85 MB MP4
 correctly.
 
+### Presenter argument passthrough
+
+Implemented for 0.2.1:
+
+- arguments after `--` are passed to pdfpc before the extracted PDF filename;
+- existing `--presenter` handling remains compatible;
+- the single-monitor workflow is now `beamerpkg present talk.beamerpkg -- -w both`;
+- regression coverage checks the exact subprocess argument order.
+
 ## Current version
 
-The feature branch bumps the package to 0.2.0 because PDF parsing adds a runtime
-dependency (`pypdf>=5,<7`) and changes the default pack workflow.
+0.2.1.
 
 ## Next
 
-Presenter argument passthrough is the next bounded feature. See
+Desktop/file association and release/CI polish are the next bounded items. See
 `docs/NEXT_STEPS.md`.

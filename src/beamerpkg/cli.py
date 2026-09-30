@@ -84,16 +84,34 @@ def _cmd_present(args: argparse.Namespace) -> int:
         report = extract_package(package, destination)
         presentation = report["manifest"]["presentation"]["path"]
         completed = subprocess.run(
-            [presenter, presentation],
+            [presenter, *args.presenter_args, presentation],
             cwd=destination,
             check=False,
         )
         return completed.returncode
 
 
+def _split_presenter_args(argv: list[str]) -> tuple[list[str], list[str]]:
+    """Split arguments after -- for transparent presenter passthrough."""
+
+    if "--" not in argv:
+        return argv, []
+
+    separator = argv.index("--")
+    cli_args = argv[:separator]
+    presenter_args = argv[separator + 1 :]
+    return cli_args, presenter_args
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
-    args = parser.parse_args(argv)
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    cli_argv, presenter_args = _split_presenter_args(raw_argv)
+    args = parser.parse_args(cli_argv)
+
+    if presenter_args and args.command != "present":
+        parser.error("arguments after -- are only supported by the present command")
+    args.presenter_args = presenter_args
     try:
         if args.command == "pack":
             return _cmd_pack(args)
