@@ -44,10 +44,7 @@
   No media packaging or viewer-specific LaTeX helper is involved.
 \end{frame}
 
-\begin{frame}{Timed overlays: lightweight pseudo-animation}
-  \transduration<1>{0.6}
-  \transduration<2>{0.6}
-
+\begin{frame}{Manual overlays: lightweight animation}
   \centering
   \begin{tikzpicture}[x=2.8cm,y=1cm]
     \node[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
@@ -66,7 +63,7 @@
   \vspace{1em}
   \only<1>{State 1: input}
   \only<2>{State 2: input $\rightarrow$ processing}
-  \only<3>{State 3: input $\rightarrow$ processing $\rightarrow$ result --- auto-advance stops here}
+  \only<3>{State 3: input $\rightarrow$ processing $\rightarrow$ result}
 \end{frame}
 
 \begin{frame}{Standard Beamer movie: wrapperless discovery}
