@@ -17,6 +17,7 @@ SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
 ASSET_LIST_SUFFIX = ".beamerpkg-assets"
 PACKAGE_SUFFIX = ".beamerpkg"
+SOURCE_PREFIX = PurePosixPath("source")
 
 
 class PackageError(ValueError):
@@ -116,6 +117,70 @@ def _select_asset_paths(
     )
 
 
+def _collect_source_files(
+    source_root: Path,
+    source_inputs: tuple[Path, ...],
+    output: Path,
+) -> tuple[tuple[PurePosixPath, Path], ...]:
+    """Collect an explicit editable-source snapshot under the source/ prefix."""
+
+    if not source_inputs:
+        return ()
+
+    source_root = source_root.resolve()
+    if not source_root.is_dir():
+        raise PackageError(f"source root is not a directory: {source_root}")
+
+    output = output.resolve()
+    collected: dict[str, tuple[PurePosixPath, Path]] = {}
+
+    def add_file(candidate: Path) -> None:
+        if candidate.is_symlink():
+            raise PackageError(f"source symlinks are not supported: {candidate}")
+
+        resolved = candidate.resolve()
+        try:
+            relative = resolved.relative_to(source_root)
+        except ValueError as exc:
+            raise PackageError(f"source escapes source root: {candidate}") from exc
+
+        if resolved == output:
+            raise PackageError(
+                "source selection includes the output package; choose narrower "
+                f"--source inputs: {candidate}"
+            )
+
+        archive_path = SOURCE_PREFIX.joinpath(*relative.parts)
+        archive_name = archive_path.as_posix()
+        collected[archive_name] = (archive_path, resolved)
+
+    for raw_input in source_inputs:
+        if raw_input.is_absolute():
+            raise PackageError(f"source input must be relative: {raw_input}")
+
+        relative_input = _safe_relative_path(raw_input.as_posix())
+        candidate = source_root.joinpath(*relative_input.parts)
+
+        if not candidate.exists():
+            raise PackageError(f"source input not found: {raw_input}")
+        if candidate.is_symlink():
+            raise PackageError(f"source symlinks are not supported: {raw_input}")
+
+        if candidate.is_file():
+            add_file(candidate)
+            continue
+        if not candidate.is_dir():
+            raise PackageError(f"source input is not a file or directory: {raw_input}")
+
+        for child in sorted(candidate.rglob("*")):
+            if child.is_symlink():
+                raise PackageError(f"source symlinks are not supported: {child}")
+            if child.is_file():
+                add_file(child)
+
+    return tuple(collected[key] for key in sorted(collected))
+
+
 def pack_package(
     pdf: Path,
     *,
@@ -123,6 +188,8 @@ def pack_package(
     asset_list: Path | None = None,
     output: Path | None = None,
     notes: Path | None = None,
+    source_root: Path | None = None,
+    sources: tuple[Path, ...] = (),
 ) -> Path:
     """Bundle a PDF and its declared media files into one relocatable ZIP container."""
 
@@ -138,6 +205,8 @@ def pack_package(
 
     output = (output or pdf.with_suffix(PACKAGE_SUFFIX)).resolve()
     asset_paths = _select_asset_paths(pdf, asset_list)
+    resolved_source_root = (source_root or root).resolve()
+    source_files = _collect_source_files(resolved_source_root, sources, output)
 
     reserved = {MANIFEST_NAME, pdf.name}
     resolved_assets: list[tuple[PurePosixPath, Path]] = []
@@ -166,12 +235,22 @@ def pack_package(
         for archive_path, source in resolved_assets
     ]
     notes_record = _file_record(notes, notes.name) if notes is not None else None
+    source_records = [
+        _file_record(source, archive_path.as_posix())
+        for archive_path, source in source_files
+    ]
+    source_record = (
+        {"root": SOURCE_PREFIX.as_posix(), "files": source_records}
+        if source_records
+        else None
+    )
 
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "presentation": presentation_record,
         "notes": notes_record,
         "assets": asset_records,
+        "source": source_record,
     }
 
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -192,6 +271,8 @@ def pack_package(
             if notes is not None:
                 zf.write(notes, arcname=notes.name)
             for archive_path, source in resolved_assets:
+                zf.write(source, arcname=archive_path.as_posix())
+            for archive_path, source in source_files:
                 zf.write(source, arcname=archive_path.as_posix())
         temporary_output.replace(output)
     except Exception:
@@ -227,6 +308,7 @@ def _manifest_records(manifest: dict[str, Any]) -> tuple[dict[str, Any], ...]:
     if not isinstance(assets, list):
         raise PackageError("manifest.assets must be a list")
     notes = manifest.get("notes")
+    source = manifest.get("source")
 
     records: list[dict[str, Any]] = [presentation]
     if notes is not None:
@@ -237,6 +319,26 @@ def _manifest_records(manifest: dict[str, Any]) -> tuple[dict[str, Any], ...]:
         if not isinstance(asset, dict):
             raise PackageError("manifest asset entries must be objects")
         records.append(asset)
+
+    if source is not None:
+        if not isinstance(source, dict):
+            raise PackageError("manifest.source must be an object or null")
+        if source.get("root") != SOURCE_PREFIX.as_posix():
+            raise PackageError("manifest.source.root must be 'source'")
+        source_files = source.get("files")
+        if not isinstance(source_files, list):
+            raise PackageError("manifest.source.files must be a list")
+        for source_file in source_files:
+            if not isinstance(source_file, dict):
+                raise PackageError("manifest source entries must be objects")
+            source_path = source_file.get("path")
+            if not isinstance(source_path, str):
+                raise PackageError("manifest source entry is missing string path")
+            safe_source_path = _safe_relative_path(source_path)
+            if not safe_source_path.parts or safe_source_path.parts[0] != "source":
+                raise PackageError("manifest source paths must be under source/")
+            records.append(source_file)
+
     return tuple(records)
 
 

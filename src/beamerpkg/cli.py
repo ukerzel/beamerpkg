@@ -26,6 +26,19 @@ def _build_parser() -> argparse.ArgumentParser:
     pack.add_argument("--assets", type=Path, default=None, help="asset-list sidecar")
     pack.add_argument("--output", "-o", type=Path, default=None)
     pack.add_argument("--notes", type=Path, default=None, help="optional .pdfpc file")
+    pack.add_argument(
+        "--source-root",
+        type=Path,
+        default=None,
+        help="root used to preserve editable source paths (defaults to --root)",
+    )
+    pack.add_argument(
+        "--source",
+        type=Path,
+        action="append",
+        default=[],
+        help="editable source file or directory relative to --source-root; repeatable",
+    )
 
     inspect = subparsers.add_parser("inspect", help="validate and describe a package")
     inspect.add_argument("package", type=Path)
@@ -49,6 +62,8 @@ def _cmd_pack(args: argparse.Namespace) -> int:
         asset_list=args.assets,
         output=args.output,
         notes=args.notes,
+        source_root=args.source_root,
+        sources=tuple(args.source),
     )
     print(output)
     return 0
@@ -68,6 +83,9 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
     print(f"assets:       {len(assets)}")
     if manifest.get("notes") is not None:
         print(f"notes:        {manifest['notes']['path']}")
+    source = manifest.get("source")
+    if source is not None:
+        print(f"source files: {len(source['files'])}")
     for asset in assets:
         print(f"  OK  {asset['path']}  {asset['size']} bytes")
     return 0

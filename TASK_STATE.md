@@ -40,9 +40,23 @@ Implemented for 0.2.1:
 - the single-monitor workflow is now `beamerpkg present talk.beamerpkg -- -w both`;
 - regression coverage checks the exact subprocess argument order.
 
+### Optional editable source payload
+
+Implemented for 0.3.0:
+
+- repeatable `--source` accepts files or directories;
+- `--source-root` defines the authoring tree whose relative structure is
+  preserved under `source/`;
+- source files are hashed and recorded separately in the manifest;
+- source directories are recursive and symlinks/path escapes are rejected;
+- extraction restores the editable source tree alongside runtime presentation
+  files;
+- the demo packages its LaTeX source, full-size assets, and
+  `tex/beamerpkg.sty`.
+
 ## Current version
 
-0.2.2.
+0.3.0.
 
 Presenter passthrough accepts both an explicit `--` separator and the
 separator-stripped form produced by `poetry run`.

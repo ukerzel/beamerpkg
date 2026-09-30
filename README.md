@@ -34,12 +34,17 @@ talk.beamerpkg
 ├── manifest.json
 ├── talk.pdf
 ├── talk.pdfpc          # optional
-└── media/
-    └── simulation.mp4
+├── media/
+│   └── simulation.mp4
+└── source/             # optional editable source snapshot
+    ├── talk.tex
+    ├── figures/
+    └── references.bib
 ```
 
-The manifest contains SHA-256 hashes and byte sizes. Media are stored at exactly
-the same relative paths used by Beamer.
+The manifest contains SHA-256 hashes and byte sizes. Runtime media are stored at
+exactly the same relative paths used by Beamer. Optional editable sources live
+under `source/` and are recorded separately in the manifest.
 
 ## Install for development
 
@@ -50,6 +55,47 @@ poetry install
 ```
 
 The only runtime Python dependency is `pypdf`, used to inspect PDF annotations.
+
+## Optional editable source payload
+
+A presentation package can also carry the LaTeX source and authoring assets so
+the recipient can modify and rebuild the presentation without editing the PDF.
+
+Source inclusion is explicit. Pass a source root and repeat `--source` for the
+files or directories to preserve:
+
+```bash
+poetry run beamerpkg pack build/talk.pdf \
+  --root build \
+  --source-root . \
+  --source talk.tex \
+  --source figures \
+  --source references.bib
+```
+
+Those files are stored with their relative structure under `source/`:
+
+```text
+source/
+├── talk.tex
+├── figures/
+│   └── plot.png
+└── references.bib
+```
+
+Because `.beamerpkg` is an ordinary ZIP archive, a recipient can unpack it,
+edit the source tree, and rebuild with their normal LaTeX toolchain. Runtime
+presentation files remain separate, so including sources never changes pdfpc
+playback.
+
+The source snapshot is deliberately opt-in and explicit: beamerpkg does not
+guess which files constitute a reproducible authoring project. Directories are
+included recursively; source paths must remain within `--source-root`, and
+symlinks are rejected.
+
+An asset needed both by the runtime presentation and by the editable source tree
+may be stored twice. This keeps both trees self-contained and avoids symlink or
+viewer-specific deduplication behavior in the package format.
 
 ## Standard Beamer: no Beamerpkg LaTeX helper required
 
@@ -153,11 +199,15 @@ single-monitor mode. Other pdfpc options work the same way.
 
 ## Demo
 
-The demo uses the full repository assets and a pdfpc metadata sidecar:
+The demo uses the full repository assets, a pdfpc metadata sidecar, and an
+editable source snapshot:
 
 - `examples/media/gemini_generated_video_b2693757.mp4`
 - `examples/media/video-poster_big.png`
 - `examples/demo.pdfpc` (speaker notes / pdfpc metadata)
+- `source/examples/demo.tex`
+- `source/examples/media/...`
+- `source/tex/beamerpkg.sty`
 
 The mixed demo also contains two lightweight Beamer/PDF motion examples before
 the video slides:
