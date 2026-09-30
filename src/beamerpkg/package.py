@@ -331,6 +331,12 @@ def _manifest_records(manifest: dict[str, Any]) -> tuple[dict[str, Any], ...]:
         for source_file in source_files:
             if not isinstance(source_file, dict):
                 raise PackageError("manifest source entries must be objects")
+            source_path = source_file.get("path")
+            if not isinstance(source_path, str):
+                raise PackageError("manifest source entry is missing string path")
+            safe_source_path = _safe_relative_path(source_path)
+            if not safe_source_path.parts or safe_source_path.parts[0] != "source":
+                raise PackageError("manifest source paths must be under source/")
             records.append(source_file)
 
     return tuple(records)
