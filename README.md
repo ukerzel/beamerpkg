@@ -98,6 +98,27 @@ This emits pdfpc's `run:` launch-link mechanism. The packer also recognizes
 these pdfpc media launch links and strips their query options when collecting
 the underlying media file.
 
+## pdfpc speaker notes and settings
+
+If a same-name pdfpc sidecar exists beside the PDF, it is included automatically:
+
+```text
+talk.pdf
+talk.pdfpc
+```
+
+```bash
+poetry run beamerpkg pack talk.pdf --root .
+```
+
+The resulting package records `talk.pdfpc` separately as `notes` in the
+manifest and restores it beside `talk.pdf` before launching pdfpc. This keeps
+speaker notes and other pdfpc presentation metadata portable without putting
+them into the PDF itself.
+
+The repository demo contains `examples/demo.pdfpc` with a visible speaker note
+on the first page so this behavior can be checked in presenter view.
+
 ## Inspect and present
 
 ```bash
@@ -132,10 +153,11 @@ single-monitor mode. Other pdfpc options work the same way.
 
 ## Demo
 
-The demo uses the full repository assets:
+The demo uses the full repository assets and a pdfpc metadata sidecar:
 
 - `examples/media/gemini_generated_video_b2693757.mp4`
 - `examples/media/video-poster_big.png`
+- `examples/demo.pdfpc` (speaker notes / pdfpc metadata)
 
 The mixed demo also contains two lightweight Beamer/PDF motion examples before
 the video slides:
