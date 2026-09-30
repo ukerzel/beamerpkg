@@ -152,10 +152,19 @@ poetry run beamerpkg present examples/wrapperless.beamerpkg
 the integration proof that packaging no longer depends on a Beamerpkg-specific
 LaTeX command. In pdfpc this wrapperless example is click-to-start.
 
-The mixed `examples/demo.tex` intentionally contains two video slides: one
-standard wrapperless `\movie` slide that is click-to-start, followed by one
-pdfpc-specific `\pkgpdfpcmovie[autostart&loop]` slide that starts
-automatically.
+The mixed `examples/demo.tex` also demonstrates two lightweight Beamer/PDF
+animation mechanisms before the video slides:
+
+- a short `\transfade[duration=0.25]` page transition;
+- a four-step TikZ overlay sequence whose first three overlay pages use
+  `\transduration` to auto-advance as a simple pseudo-animation.
+
+These remain ordinary PDF/Beamer features; there is no `animate` package,
+JavaScript, or Acrobat-specific animation path.
+
+The demo then contains two video slides: one standard wrapperless `\movie`
+slide that is click-to-start, followed by one pdfpc-specific
+`\pkgpdfpcmovie[autostart&loop]` slide that starts automatically.
 
 See [`docs/MVP.md`](docs/MVP.md) for the original acceptance test and
 [`docs/NEXT_STEPS.md`](docs/NEXT_STEPS.md) for the remaining work.
