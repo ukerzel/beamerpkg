@@ -107,7 +107,18 @@ poetry run beamerpkg present talk.beamerpkg
 
 `beamerpkg present` validates the archive, extracts it to a temporary directory
 while preserving all relative paths, launches `pdfpc` from that directory, and
-keeps the directory alive until the presenter exits.
+keeps the directory alive until the presenter exits. Arguments after `--` are
+forwarded verbatim to the presenter before the PDF filename.
+
+For a single physical monitor, keep both pdfpc windows available and switch
+between presenter and audience views with the desktop window switcher:
+
+```bash
+poetry run beamerpkg present talk.beamerpkg -- -w both
+```
+
+This is intentionally transparent passthrough rather than a Beamerpkg-specific
+single-monitor mode. Other pdfpc options work the same way.
 
 ## Demo
 
