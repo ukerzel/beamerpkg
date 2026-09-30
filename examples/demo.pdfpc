@@ -1,0 +1,13 @@
+{
+  "pdfpcFormat": 2,
+  "disableMarkdown": false,
+  "noteFontSize": 18,
+  "pages": [
+    {
+      "idx": 0,
+      "label": "",
+      "overlay": 0,
+      "note": "**Portable speaker note**\n\nThis note lives in examples/demo.pdfpc. It should appear in pdfpc's presenter view and travel inside demo.beamerpkg beside demo.pdf."
+    }
+  ]
+}
