@@ -1,6 +1,6 @@
 [project]
 name = "beamerpkg"
-version = "0.2.1"
+version = "0.2.2"
 description = "Portable Beamer/PDF presentation bundles with external media assets"
 readme = "README.md"
 license = "Apache-2.0"
