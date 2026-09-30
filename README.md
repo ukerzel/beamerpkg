@@ -53,6 +53,10 @@ The only runtime Python dependency is `pypdf`, used to inspect PDF annotations.
 
 ## Standard Beamer: no Beamerpkg LaTeX helper required
 
+The wrapperless standard-Beamer route is **click-to-start in pdfpc**. This is
+the expected behavior of the normal `\movie` annotation path; autoplay is a
+separate pdfpc-specific feature described below.
+
 Write an ordinary Beamer movie:
 
 ```latex
@@ -125,7 +129,12 @@ poetry run beamerpkg present examples/wrapperless.beamerpkg
 
 `examples/wrapperless.tex` imports only Beamer's `multimedia` package. It is
 the integration proof that packaging no longer depends on a Beamerpkg-specific
-LaTeX command.
+LaTeX command. In pdfpc this wrapperless example is click-to-start.
+
+The mixed `examples/demo.tex` intentionally contains two video slides: one
+standard wrapperless `\movie` slide that is click-to-start, followed by one
+pdfpc-specific `\pkgpdfpcmovie[autostart&loop]` slide that starts
+automatically.
 
 See [`docs/MVP.md`](docs/MVP.md) for the original acceptance test and
 [`docs/NEXT_STEPS.md`](docs/NEXT_STEPS.md) for the remaining work.
