@@ -1,61 +1,42 @@
 # Task state
 
-## Current objective
+## Completed
 
-The original MVP objective — validate the `PDF + relative media paths + ZIP
-container + pdfpc` architecture — is complete.
+### MVP container/path validation
 
-The next architecture spike remains wrapperless discovery of standard Beamer
-movie annotations. A separate pdfpc-specific autoplay experiment has been added
-to the demo at user request.
+Validated on 2026-09-30 under WSL/WSLg with pdfpc:
 
-## MVP result
+- packaged PDF and relative media restoration works;
+- pdfpc plays the packaged H.264 video in the TeX-defined rectangle;
+- full-resolution video/poster work;
+- pdfpc-specific autoplay and looping work;
+- ordinary Beamer/PDF rendering remains unchanged.
 
-**Validated on 2026-09-30 under WSL/WSLg with pdfpc.**
+### Wrapperless media discovery
 
-Observed end-to-end behavior:
+Implemented and locally validated:
 
-- `beamerpkg present examples/demo.beamerpkg` restored the packaged PDF and
-  relative media path correctly.
-- pdfpc detected the Beamer movie annotation and opened the packaged MP4.
-- after installing the required local GStreamer H.264 decoder, clicking the
-  poster played the video in the TeX-defined rectangle;
-- ordinary Beamer rendering and overlays remained PDF/Beamer behavior.
-- running `pdfpc examples/demo.pdf` directly produced the same click-to-play
-  behavior, confirming that the package layer adds no rendering-specific
-  behavior.
+- standard Beamer `/Movie` annotations are discovered with `pypdf`;
+- pdfpc `/Launch` media links with recognized media options are discovered;
+- duplicate references are collapsed;
+- remote/URI and path-traversing media references fail closed;
+- unrelated launch actions are ignored;
+- explicit `--assets` remains supported;
+- the historical `.beamerpkg-assets` file remains a fallback;
+- `examples/wrapperless.tex` uses only stock Beamer `multimedia/\movie`;
+- both the mixed demo and wrapperless demo compile and package without relying
+  on a sidecar.
 
-## Current demo
+Local evidence: 10 focused tests pass, Python compilation succeeds, and real
+pdflatex output for both annotation forms packages the full 7.85 MB MP4
+correctly.
 
-The demo now uses the full-size repository assets:
+## Current version
 
-- `examples/media/gemini_generated_video_b2693757.mp4` (~7.85 MB);
-- `examples/media/video-poster_big.png` (~2.64 MB).
+The feature branch bumps the package to 0.2.0 because PDF parsing adds a runtime
+dependency (`pypdf>=5,<7`) and changes the default pack workflow.
 
-The video slide uses a pdfpc-specific launch link with `autostart&loop`.
-A local compile confirmed that the PDF contains the expected `/Launch`
-annotation and that the asset sidecar still records the video path without query
-options. Real pdfpc autoplay behavior is awaiting the next user run.
+## Next
 
-## Implemented
-
-- Poetry project skeleton derived from `ukerzel/Template-` conventions.
-- `beamerpkg pack`.
-- `beamerpkg inspect` with size/SHA-256 verification.
-- `beamerpkg present` using a temporary restored filesystem context.
-- portable `\pkgmovie` helper for standard Beamer movie annotations.
-- separate `\pkgpdfpcmovie` helper for pdfpc-specific launch-link options such
-  as autoplay.
-- Beamer demo with equations, TikZ, columns, overlays, full-size poster, and
-  full-size MP4.
-- focused tests for relocation, integrity, traversal rejection, and presenter
-  working-directory behavior.
-- successful real pdfpc/GStreamer click-to-play test.
-
-## Next architecture spike
-
-Remove the project-specific `\pkgmovie` authoring requirement by discovering
-standard Beamer `\movie` media references directly from PDF annotations during
-`beamerpkg pack`.
-
-See `docs/NEXT_STEPS.md`.
+Presenter argument passthrough is the next bounded feature. See
+`docs/NEXT_STEPS.md`.
