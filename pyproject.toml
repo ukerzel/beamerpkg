@@ -1,12 +1,12 @@
 [project]
 name = "beamerpkg"
-version = "0.1.0"
+version = "0.2.0"
 description = "Portable Beamer/PDF presentation bundles with external media assets"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11,<4.0"
 authors = [{ name = "Uli Kerzel" }]
-dependencies = []
+dependencies = ["pypdf>=5.0,<7.0"]
 
 [project.scripts]
 beamerpkg = "beamerpkg.cli:main"

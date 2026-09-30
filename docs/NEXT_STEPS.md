@@ -1,66 +1,26 @@
-# Next steps after the MVP
+# Next steps after wrapperless discovery
 
-The MVP established that a ZIP-based container can make an external-media Beamer
-PDF relocatable without replacing Beamer/PDF rendering.
-
-The remaining work should stay incremental.
-
-## 1. Next architecture spike: wrapperless media discovery
-
-### Goal
-
-Allow a conventional Beamer document such as
-
-```latex
-\usepackage{multimedia}
-
-\movie[loop,showcontrols]
-  {\includegraphics[width=\linewidth]{media/poster.jpg}}
-  {media/video.mp4}
-```
-
-to be packaged with:
-
-```bash
-beamerpkg pack talk.pdf --root .
-```
-
-without `beamerpkg.sty` and without a `.beamerpkg-assets` sidecar.
-
-### Proposed approach
-
-Read PDF annotations during `pack` and collect only standard external movie
-references. For the MVP-generated PDF, the relevant structure is a movie
-annotation whose file specification contains a relative `/F` path such as:
+The core path is now:
 
 ```text
-/F (media/video.mp4)
+ordinary Beamer \movie
+        ↓
+PDF /Movie annotation
+        ↓
+beamerpkg pack discovers local media
+        ↓
+relocatable .beamerpkg
+        ↓
+pdfpc
 ```
 
-Resolve those paths against `--root`, retain the same fail-closed traversal
-checks used by the current sidecar route, deduplicate them, and package them at
-the identical archive paths.
+The legacy `.beamerpkg-assets` route remains only as an explicit/fallback
+compatibility path.
 
-### Compatibility
+## 1. Presenter ergonomics
 
-Keep the current explicit `--assets` / sidecar route temporarily as a fallback
-until the PDF-discovery route has an end-to-end test. Do not create two
-independent packaging implementations; both routes should feed the same validated
-asset-path pipeline.
-
-### Completion evidence
-
-- an unmodified standard Beamer `\movie` demo packages successfully;
-- no `beamerpkg.sty` is required for that demo;
-- the generated package passes the existing relocation/integrity tests;
-- the real pdfpc click-to-play test still works;
-- malformed, absolute, remote, and path-traversing references fail clearly or
-  are explicitly classified as unsupported.
-
-## 2. Presenter ergonomics
-
-After wrapperless packing, allow presenter arguments to pass through, for
-example:
+Allow pdfpc arguments to pass through without inventing platform-specific policy,
+for example:
 
 ```bash
 beamerpkg present talk.beamerpkg -- -S -w both
@@ -69,32 +29,35 @@ beamerpkg present talk.beamerpkg -- -S -w both
 This is useful for rehearsal, WSL/WSLg, and unusual display setups while keeping
 pdfpc responsible for presentation semantics.
 
-## 3. Autoplay experiment
+## 2. Autoplay compatibility
 
-The demo now contains an explicit pdfpc-only autoplay path using:
+The current demo has a working pdfpc-specific autoplay path:
 
 ```latex
 \pkgpdfpcmovie[autostart&loop]{poster}{media/video.mp4}
 ```
 
-This maps to pdfpc's `run:...?...autostart` launch-link mechanism. It is kept
-separate from the portable standard `\movie` path and does not change the
-container schema.
+The packer recognizes the resulting `/Launch` action only when it carries known
+pdfpc media options (`autostart`, `loop`, `start`, or `stop`). Unrelated
+PDF launch actions are ignored rather than packaged.
 
-The local LaTeX smoke test confirms that the resulting PDF contains a `/Launch`
-annotation targeting the full video with `?autostart&loop`. The remaining
-evidence is a real pdfpc run confirming that playback starts automatically on
-slide entry.
+Keep this separate from standard `\movie`: autoplay is a viewer capability,
+not a container property.
 
-Do not generalize this into a portable autoplay abstraction unless another
-viewer-compatible mechanism is demonstrated.
+## 3. Desktop/file association
 
-## 4. Desktop/file association
+After the CLI stabilizes, associate `.beamerpkg` with a thin launcher on
+Linux/macOS/Windows. This should call the same validation/extraction code rather
+than introduce a second application architecture.
 
-Only after the CLI and wrapperless path are stable, add convenience integration
-such as associating `.beamerpkg` with a tiny launcher on Linux/macOS/Windows.
-This should remain a shell around the same package validation/extraction code,
-not become a second application architecture.
+## 4. Packaging/release polish
+
+- generate and commit a Poetry lock file from a Poetry-enabled development
+  machine;
+- add CI for pytest/Ruff/mypy and the synthetic PDF tests;
+- decide whether the legacy sidecar helper should eventually be deprecated;
+- document supported PDF annotation forms as a small versioned compatibility
+  contract.
 
 ## Non-goals carried forward
 
@@ -102,4 +65,5 @@ not become a second application architecture.
 - custom PDF renderer;
 - custom video player;
 - PowerPoint/Keynote import/export;
+- packaging arbitrary PDF `/Launch` targets;
 - speculative package metadata without a concrete consumer.

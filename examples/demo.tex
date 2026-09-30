@@ -4,7 +4,7 @@
 \usepackage{tikz}
 \usepackage{beamerpkg}
 
-\title{beamerpkg MVP}
+\title{beamerpkg demo}
 \author{Demo}
 \date{}
 
@@ -33,12 +33,25 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{Standard Beamer movie: wrapperless discovery}
+  \begin{columns}
+    \column{0.38\textwidth}
+      This is a stock Beamer \texttt{\\movie}. The packer discovers the
+      external MP4 directly from the PDF annotation. In pdfpc it is
+      click-to-play.
+    \column{0.58\textwidth}
+      \movie[loop,showcontrols]
+        {\includegraphics[width=\linewidth]{media/video-poster_big.png}}
+        {media/gemini_generated_video_b2693757.mp4}
+  \end{columns}
+\end{frame}
+
 \begin{frame}{Autoplay video (pdfpc-specific)}
   \begin{columns}
     \column{0.38\textwidth}
-      The slide itself is still ordinary Beamer/PDF. For this demo, pdfpc's
-      \texttt{run:} link mechanism starts the packaged full-resolution video
-      automatically and loops it while the slide is shown.
+      The slide is still ordinary Beamer/PDF. The pdfpc-specific launch link
+      starts the same packaged video automatically and loops it while the slide
+      is shown.
     \column{0.58\textwidth}
       \pkgpdfpcmovie[autostart&loop]
         {\includegraphics[width=\linewidth]{media/video-poster_big.png}}
