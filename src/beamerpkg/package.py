@@ -11,6 +11,8 @@ import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from .pdf_media import PdfMediaError, discover_pdf_media_references
+
 SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
 ASSET_LIST_SUFFIX = ".beamerpkg-assets"
@@ -41,6 +43,8 @@ def _safe_relative_path(raw: str) -> PurePosixPath:
     normalized = raw.strip().replace("\\", "/")
     if not normalized:
         raise PackageError("asset path is empty")
+    if "://" in normalized or normalized.lower().startswith("file:"):
+        raise PackageError(f"remote or URI media references are unsupported: {raw!r}")
     path = PurePosixPath(normalized)
     if path.is_absolute() or ".." in path.parts or "." in path.parts:
         raise PackageError(f"asset path must be a clean relative path: {raw!r}")
@@ -74,6 +78,44 @@ def read_asset_list(path: Path) -> tuple[PurePosixPath, ...]:
     return tuple(assets)
 
 
+def _select_asset_paths(
+    pdf: Path,
+    asset_list: Path | None,
+) -> tuple[PurePosixPath, ...]:
+    """Choose explicit sidecar assets or discover them from PDF annotations."""
+
+    if asset_list is not None:
+        resolved_asset_list = asset_list.resolve()
+        asset_paths = read_asset_list(resolved_asset_list)
+        if not asset_paths:
+            raise PackageError(
+                f"asset list contains no media paths: {resolved_asset_list}"
+            )
+        return asset_paths
+
+    try:
+        discovered = tuple(
+            _safe_relative_path(reference)
+            for reference in discover_pdf_media_references(pdf)
+        )
+    except PdfMediaError as exc:
+        raise PackageError(str(exc)) from exc
+
+    if discovered:
+        return discovered
+
+    legacy_sidecar = pdf.with_suffix(ASSET_LIST_SUFFIX)
+    if legacy_sidecar.is_file():
+        asset_paths = read_asset_list(legacy_sidecar)
+        if asset_paths:
+            return asset_paths
+
+    raise PackageError(
+        "no supported external media references found in PDF and no "
+        f"legacy asset list found at {legacy_sidecar}"
+    )
+
+
 def pack_package(
     pdf: Path,
     *,
@@ -94,12 +136,8 @@ def pack_package(
     if not root.is_dir():
         raise PackageError(f"asset root is not a directory: {root}")
 
-    asset_list = (asset_list or pdf.with_suffix(ASSET_LIST_SUFFIX)).resolve()
     output = (output or pdf.with_suffix(PACKAGE_SUFFIX)).resolve()
-
-    asset_paths = read_asset_list(asset_list)
-    if not asset_paths:
-        raise PackageError(f"asset list contains no media paths: {asset_list}")
+    asset_paths = _select_asset_paths(pdf, asset_list)
 
     reserved = {MANIFEST_NAME, pdf.name}
     resolved_assets: list[tuple[PurePosixPath, Path]] = []
