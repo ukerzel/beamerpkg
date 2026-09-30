@@ -1,9 +1,7 @@
 # beamerpkg
 
-`beamerpkg` is a small experiment in making multimedia Beamer presentations
-portable without replacing Beamer's rendering model.
-
-The premise is deliberately narrow:
+`beamerpkg` makes multimedia Beamer presentations portable without replacing
+Beamer's rendering model.
 
 ```text
 Beamer -> ordinary PDF + external MP4 files -> one relocatable .beamerpkg
@@ -16,7 +14,19 @@ Equations, TikZ, columns, backgrounds, arrows, Beamer overlays, fonts, and all
 other slide layout remain PDF. The package layer only restores external media at
 the relative paths already referenced by the PDF.
 
-## MVP
+## MVP status
+
+**Validated on 2026-09-30 with pdfpc under WSL/WSLg.**
+
+The packaged PDF rendered normally and clicking the poster played the packaged
+H.264 video in the TeX-defined rectangle. Running the PDF directly through pdfpc
+gave the same behavior, confirming that beamerpkg is only the transport/path
+layer.
+
+See [`docs/MVP.md`](docs/MVP.md) for the recorded acceptance test and
+[`docs/NEXT_STEPS.md`](docs/NEXT_STEPS.md) for the next spike.
+
+## Package format
 
 A `.beamerpkg` is an ordinary ZIP archive:
 
@@ -42,10 +52,10 @@ poetry install
 
 Runtime code intentionally uses only the Python standard library.
 
-## Authoring
+## Current MVP authoring route
 
-Add the small helper package to TeX's search path and use `\pkgmovie` where a
-normal Beamer `\movie` would be used:
+The first MVP uses the small helper package `tex/beamerpkg.sty` and
+`\pkgmovie` where a normal Beamer `\movie` would be used:
 
 ```latex
 \usepackage{beamerpkg}
@@ -55,13 +65,14 @@ normal Beamer `\movie` would be used:
   {media/simulation.mp4}
 ```
 
-The macro delegates the actual PDF movie annotation and geometry to Beamer's
-`multimedia` package. It additionally records `media/simulation.mp4` in
+The macro delegates the PDF movie annotation and geometry to Beamer's
+`multimedia` package and records the media path in
 `<jobname>.beamerpkg-assets`.
 
-## Package
+The next spike is to discover standard `\movie` references directly from the
+PDF so this helper is no longer required.
 
-If the PDF, asset list, and media are rooted in the same directory:
+## Package
 
 ```bash
 poetry run beamerpkg pack talk.pdf --root .
@@ -84,11 +95,13 @@ poetry run beamerpkg inspect talk.beamerpkg
 
 ## Present
 
-With `pdfpc` installed:
+With `pdfpc` and the required GStreamer codecs installed:
 
 ```bash
 poetry run beamerpkg present talk.beamerpkg
 ```
+
+The poster is click-to-play with the current pdfpc movie-annotation path.
 
 `beamerpkg` validates the archive, extracts it to a temporary directory while
 preserving all relative paths, launches `pdfpc` from that directory, and keeps
@@ -96,14 +109,10 @@ the directory alive until the presenter exits.
 
 ## Demo
 
-The demo intentionally mixes equations, TikZ, columns, overlays, and video.
-A repository-friendly H.264 transcode of the supplied 1280x720 test video and a poster frame are committed under `examples/media/`. Build the PDF/package with:
+The demo mixes equations, TikZ, columns, overlays, and video. A
+repository-friendly H.264 test video and poster are under `examples/media/`.
 
 ```bash
 ./examples/build_demo.sh
+poetry run beamerpkg present examples/demo.beamerpkg
 ```
-
-Then copy **only** `examples/demo.beamerpkg` elsewhere and run it with pdfpc.
-That relocation test is the core MVP acceptance criterion.
-
-See [`docs/MVP.md`](docs/MVP.md) for the scope and acceptance test.
