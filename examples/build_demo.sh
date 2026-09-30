@@ -14,5 +14,13 @@ done
 
 TEXINPUTS="../tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
 TEXINPUTS="../tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
+
+# Prove that packaging no longer depends on the LaTeX sidecar.
+rm -f demo.beamerpkg-assets
 PYTHONPATH=../src python3 -m beamerpkg.cli pack demo.pdf --root .
-echo "Created examples/demo.beamerpkg"
+
+pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
+pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
+PYTHONPATH=../src python3 -m beamerpkg.cli pack wrapperless.pdf --root .
+
+echo "Created examples/demo.beamerpkg and examples/wrapperless.beamerpkg"
