@@ -111,10 +111,20 @@ keeps the directory alive until the presenter exits. Arguments after `--` are
 forwarded verbatim to the presenter before the PDF filename.
 
 For a single physical monitor, keep both pdfpc windows available and switch
-between presenter and audience views with the desktop window switcher:
+between presenter and audience views with the desktop window switcher.
+
+When invoking through Poetry, pass pdfpc options directly after the package:
 
 ```bash
-poetry run beamerpkg present talk.beamerpkg -- -w both
+poetry run beamerpkg present talk.beamerpkg -w both
+```
+
+Poetry may consume a literal `--` separator before the Beamerpkg CLI sees it.
+When invoking an installed `beamerpkg` executable directly, the explicit
+separator form is also supported:
+
+```bash
+beamerpkg present talk.beamerpkg -- -w both
 ```
 
 This is intentionally transparent passthrough rather than a Beamerpkg-specific
