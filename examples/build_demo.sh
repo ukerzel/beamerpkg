@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$SCRIPT_DIR"
 
 for asset in \
   media/gemini_generated_video_b2693757.mp4 \
@@ -17,10 +20,16 @@ TEXINPUTS="../tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-e
 
 # Prove that packaging no longer depends on the LaTeX sidecar.
 rm -f demo.beamerpkg-assets
-PYTHONPATH=../src python3 -m beamerpkg.cli pack demo.pdf --root .
+poetry -C "$REPO_ROOT" run beamerpkg pack \
+  "$SCRIPT_DIR/demo.pdf" \
+  --root "$SCRIPT_DIR" \
+  --output "$SCRIPT_DIR/demo.beamerpkg"
 
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
-PYTHONPATH=../src python3 -m beamerpkg.cli pack wrapperless.pdf --root .
+poetry -C "$REPO_ROOT" run beamerpkg pack \
+  "$SCRIPT_DIR/wrapperless.pdf" \
+  --root "$SCRIPT_DIR" \
+  --output "$SCRIPT_DIR/wrapperless.beamerpkg"
 
 echo "Created examples/demo.beamerpkg and examples/wrapperless.beamerpkg"
