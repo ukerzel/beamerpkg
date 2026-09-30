@@ -33,6 +33,40 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{Lightweight page transition}
+  \transfade[duration=0.2]
+  \centering
+  \Large
+  This frame fades in using Beamer's standard PDF transition metadata.
+
+  \vspace{1em}
+  \normalsize
+  No media packaging or viewer-specific LaTeX helper is involved.
+\end{frame}
+
+\begin{frame}{Timed overlays: lightweight pseudo-animation}
+  \transduration<1>{0.6}
+  \transduration<2>{0.6}
+  \transduration<3>{}
+
+  \centering
+  \begin{tikzpicture}[x=2.3cm,y=1cm]
+    \draw[->,thick] (0,0) -- (3.35,0);
+    \foreach \x/\label in {0/Input,1/Model,2/Result}
+      \node[draw,rounded corners,minimum width=1.7cm,minimum height=0.8cm]
+        at (\x,0) {\label};
+
+    \only<1>{\fill (0,0.7) circle[radius=0.11];}
+    \only<2>{\fill (1,0.7) circle[radius=0.11];}
+    \only<3>{\fill (2,0.7) circle[radius=0.11];}
+  \end{tikzpicture}
+
+  \vspace{1em}
+  \only<1>{State 1: input}
+  \only<2>{State 2: processing}
+  \only<3>{State 3: result --- auto-advance stops here}
+\end{frame}
+
 \begin{frame}{Standard Beamer movie: wrapperless discovery}
   \begin{columns}
     \column{0.38\textwidth}
