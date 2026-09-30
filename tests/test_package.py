@@ -187,3 +187,42 @@ def test_pack_rejects_asset_path_escape(tmp_path: Path) -> None:
 
     with pytest.raises(PackageError, match="clean relative path"):
         pack_package(pdf, root=tmp_path, asset_list=assets)
+
+
+def test_pack_includes_same_name_pdfpc_sidecar_and_extracts_it(tmp_path: Path) -> None:
+    pdf, assets = _write_project(tmp_path)
+    notes = tmp_path / "talk.pdfpc"
+    notes.write_text(
+        json.dumps(
+            {
+                "pdfpcFormat": 2,
+                "disableMarkdown": False,
+                "pages": [
+                    {
+                        "idx": 0,
+                        "label": "",
+                        "overlay": 0,
+                        "note": "Portable speaker note",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    package = pack_package(pdf, root=tmp_path, asset_list=assets)
+
+    report = inspect_package(package)
+    assert report["manifest"]["notes"]["path"] == "talk.pdfpc"
+
+    with zipfile.ZipFile(package) as zf:
+        assert "talk.pdfpc" in zf.namelist()
+        assert json.loads(zf.read("talk.pdfpc"))["pages"][0]["note"] == (
+            "Portable speaker note"
+        )
+
+    extracted = tmp_path / "unpacked-notes"
+    extract_package(package, extracted)
+    assert (extracted / "talk.pdfpc").read_text(encoding="utf-8") == (
+        notes.read_text(encoding="utf-8")
+    )
