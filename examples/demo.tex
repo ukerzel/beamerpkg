@@ -33,6 +33,40 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{Lightweight PDF page transition}
+  \transfade[duration=0.25]
+  \centering
+  \Large
+  This frame uses Beamer's standard PDF fade transition.
+
+  \vspace{1em}
+  \normalsize
+  No video, JavaScript, or Acrobat-specific animation package is involved.
+\end{frame}
+
+\begin{frame}{Timed overlays as pseudo-animation}
+  % Auto-advance the first three overlay pages; stop on the final state.
+  \transduration<1-3>{0.55}
+  \transduration<4>{}
+
+  \centering
+  \begin{tikzpicture}[x=1.35cm,y=1.35cm]
+    \draw[->,thick] (0,0) -- (5.2,0) node[right] {$t$};
+    \foreach \x in {0,1,2,3,4}
+      \draw (\x,-0.08) -- (\x,0.08);
+
+    \only<1>{\fill (0.5,0.7) circle (0.12);}
+    \only<2>{\fill (1.5,0.7) circle (0.12);}
+    \only<3>{\fill (2.5,0.7) circle (0.12);}
+    \only<4>{\fill (3.5,0.7) circle (0.12);}
+
+    \node[below] at (2.2,-0.35) {four ordinary Beamer overlay pages};
+  \end{tikzpicture}
+
+  \vspace{1em}
+  The first three overlays advance automatically; the last one waits for input.
+\end{frame}
+
 \begin{frame}{Standard Beamer movie: wrapperless discovery}
   \begin{columns}
     \column{0.38\textwidth}
