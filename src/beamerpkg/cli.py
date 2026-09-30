@@ -106,12 +106,21 @@ def _split_presenter_args(argv: list[str]) -> tuple[list[str], list[str]]:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     raw_argv = list(sys.argv[1:] if argv is None else argv)
-    cli_argv, presenter_args = _split_presenter_args(raw_argv)
-    args = parser.parse_args(cli_argv)
+    cli_argv, explicit_presenter_args = _split_presenter_args(raw_argv)
+    args, unknown = parser.parse_known_args(cli_argv)
 
-    if presenter_args and args.command != "present":
-        parser.error("arguments after -- are only supported by the present command")
-    args.presenter_args = presenter_args
+    if args.command == "present":
+        if explicit_presenter_args and unknown:
+            parser.error(
+                "presenter arguments must be either after -- or passed directly, not both"
+            )
+        args.presenter_args = explicit_presenter_args or unknown
+    else:
+        if explicit_presenter_args:
+            parser.error("arguments after -- are only supported by the present command")
+        if unknown:
+            parser.error("unrecognized arguments: " + " ".join(unknown))
+        args.presenter_args = []
     try:
         if args.command == "pack":
             return _cmd_pack(args)

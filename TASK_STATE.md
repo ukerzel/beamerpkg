@@ -42,7 +42,10 @@ Implemented for 0.2.1:
 
 ## Current version
 
-0.2.1.
+0.2.2.
+
+Presenter passthrough accepts both an explicit `--` separator and the
+separator-stripped form produced by `poetry run`.
 
 ## Next
 
