@@ -226,3 +226,77 @@ def test_pack_includes_same_name_pdfpc_sidecar_and_extracts_it(tmp_path: Path) -
     assert (extracted / "talk.pdfpc").read_text(encoding="utf-8") == (
         notes.read_text(encoding="utf-8")
     )
+
+
+def test_pack_includes_editable_source_snapshot(tmp_path: Path) -> None:
+    runtime_root = tmp_path / "runtime"
+    runtime_root.mkdir()
+    pdf = runtime_root / "talk.pdf"
+    pdf.write_bytes(b"%PDF-1.7\nminimal\n")
+    media = runtime_root / "media"
+    media.mkdir()
+    (media / "clip.mp4").write_bytes(b"video")
+    assets = runtime_root / "talk.beamerpkg-assets"
+    assets.write_text("media/clip.mp4\n", encoding="utf-8")
+
+    source_root = tmp_path / "authoring"
+    (source_root / "figures").mkdir(parents=True)
+    (source_root / "talk.tex").write_text(
+        "\\documentclass{beamer}\n",
+        encoding="utf-8",
+    )
+    (source_root / "figures" / "plot.png").write_bytes(b"png-bytes")
+
+    package = pack_package(
+        pdf,
+        root=runtime_root,
+        asset_list=assets,
+        source_root=source_root,
+        sources=(Path("talk.tex"), Path("figures")),
+    )
+
+    report = inspect_package(package)
+    source = report["manifest"]["source"]
+    assert source["root"] == "source"
+    assert [record["path"] for record in source["files"]] == [
+        "source/figures/plot.png",
+        "source/talk.tex",
+    ]
+
+    with zipfile.ZipFile(package) as zf:
+        assert zf.read("source/talk.tex") == b"\\documentclass{beamer}\n"
+        assert zf.read("source/figures/plot.png") == b"png-bytes"
+
+    extracted = tmp_path / "unpacked-source"
+    extract_package(package, extracted)
+    assert (extracted / "source" / "talk.tex").is_file()
+    assert (extracted / "source" / "figures" / "plot.png").read_bytes() == (
+        b"png-bytes"
+    )
+
+
+def test_pack_rejects_source_path_escape(tmp_path: Path) -> None:
+    pdf, assets = _write_project(tmp_path)
+    (tmp_path.parent / "outside.tex").write_text("outside", encoding="utf-8")
+
+    with pytest.raises(PackageError, match="clean relative path"):
+        pack_package(
+            pdf,
+            root=tmp_path,
+            asset_list=assets,
+            source_root=tmp_path,
+            sources=(Path("../outside.tex"),),
+        )
+
+
+def test_pack_rejects_missing_source_input(tmp_path: Path) -> None:
+    pdf, assets = _write_project(tmp_path)
+
+    with pytest.raises(PackageError, match="source input not found"):
+        pack_package(
+            pdf,
+            root=tmp_path,
+            asset_list=assets,
+            source_root=tmp_path,
+            sources=(Path("missing.tex"),),
+        )
