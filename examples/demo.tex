@@ -47,24 +47,26 @@
 \begin{frame}{Timed overlays: lightweight pseudo-animation}
   \transduration<1>{0.6}
   \transduration<2>{0.6}
-  \transduration<3>{}
 
   \centering
-  \begin{tikzpicture}[x=2.3cm,y=1cm]
-    \draw[->,thick] (0,0) -- (3.35,0);
-    \foreach \x/\label in {0/Input,1/Model,2/Result}
-      \node[draw,rounded corners,minimum width=1.7cm,minimum height=0.8cm]
-        at (\x,0) {\label};
+  \begin{tikzpicture}[x=2.8cm,y=1cm]
+    \node[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
+      (input) at (0,0) {Input};
 
-    \only<1>{\fill (0,0.7) circle[radius=0.11];}
-    \only<2>{\fill (1,0.7) circle[radius=0.11];}
-    \only<3>{\fill (2,0.7) circle[radius=0.11];}
+    \node<2->[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
+      (model) at (1,0) {Model};
+
+    \node<3->[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
+      (result) at (2,0) {Result};
+
+    \draw<2->[->,thick] (input) -- (model);
+    \draw<3->[->,thick] (model) -- (result);
   \end{tikzpicture}
 
   \vspace{1em}
   \only<1>{State 1: input}
-  \only<2>{State 2: processing}
-  \only<3>{State 3: result --- auto-advance stops here}
+  \only<2>{State 2: input $\rightarrow$ processing}
+  \only<3>{State 3: input $\rightarrow$ processing $\rightarrow$ result --- auto-advance stops here}
 \end{frame}
 
 \begin{frame}{Standard Beamer movie: wrapperless discovery}
