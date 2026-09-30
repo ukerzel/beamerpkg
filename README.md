@@ -137,6 +137,16 @@ The demo uses the full repository assets:
 - `examples/media/gemini_generated_video_b2693757.mp4`
 - `examples/media/video-poster_big.png`
 
+The mixed demo also contains two lightweight Beamer/PDF motion examples before
+the video slides:
+
+- a short `\transfade[duration=0.2]` page transition;
+- a three-state overlay sequence using `\transduration` for timed
+  pseudo-animation, with auto-advance stopped on the final state.
+
+These are encoded in the PDF itself; `beamerpkg` does not need to discover or
+package anything special for them.
+
 Build both the mixed autoplay demo and a pure stock-Beamer wrapperless example:
 
 ```bash
