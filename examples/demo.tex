@@ -1,102 +1,463 @@
-\documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=169,11pt]{beamer}
 
+\usepackage[T1]{fontenc}
+\IfFileExists{FiraSans.sty}{\usepackage[sfdefault]{FiraSans}}{}
+\IfFileExists{FiraMono.sty}{\usepackage[scale=0.9]{FiraMono}}{}
 \usepackage{amsmath}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.misc}
 \usepackage{beamerpkg}
+% Speaker notes are embedded in the PDF as hidden annotations; pdfpc shows
+% them on the presenter screen. duration= drives pdfpc's countdown timer.
+\usepackage[duration=10,lastminutes=2]{pdfpc}
 
-\title{beamerpkg demo}
-\author{Demo}
+% ---------------------------------------------------------------------------
+% Palette (taken from the demo video poster)
+% ---------------------------------------------------------------------------
+\definecolor{navy}{HTML}{0B1730}
+\definecolor{navylight}{HTML}{16264A}
+\definecolor{amber}{HTML}{F5A524}
+\definecolor{sky}{HTML}{38BDF8}
+\definecolor{violet}{HTML}{A78BFA}
+\definecolor{ink}{HTML}{1F2937}
+\definecolor{muted}{HTML}{6B7280}
+\definecolor{paper}{HTML}{F8FAFC}
+\definecolor{line}{HTML}{E2E8F0}
+\definecolor{danger}{HTML}{E5484D}
+
+% ---------------------------------------------------------------------------
+% Theme
+% ---------------------------------------------------------------------------
+\setbeamersize{text margin left=10mm,text margin right=10mm}
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamercolor{background canvas}{bg=paper}
+\setbeamercolor{normal text}{fg=ink}
+\setbeamercolor{structure}{fg=navy}
+\setbeamercolor{alerted text}{fg=amber!85!black}
+\setbeamercolor{frametitle}{fg=navy}
+\setbeamercolor{block title}{fg=white,bg=navy}
+\setbeamercolor{block body}{fg=ink,bg=white}
+\setbeamercolor{item}{fg=amber}
+
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{block title}{size=\small,series=\bfseries}
+
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize item}{\raisebox{0.15ex}{\tikz\fill[amber] (0,0) rectangle (0.9ex,0.9ex);}}
+\setbeamertemplate{itemize subitem}{\color{muted}\textendash}
+
+\setbeamertemplate{frametitle}{%
+  \vskip7mm
+  \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}%
+  \insertframetitle\par
+  \vskip1.6mm
+  {\color{amber}\rule{9mm}{1.6pt}}\par
+  \vskip-1mm
+}
+
+\setbeamertemplate{footline}{%
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,8mm);
+    \node[anchor=west,font=\tiny,text=muted] at (10mm,4mm) {beamerpkg \textperiodcentered{} demo};
+    \node[anchor=east,font=\tiny\bfseries,text=muted] at ($(\paperwidth,4mm)-(10mm,0)$)
+      {\insertframenumber\,/\,\inserttotalframenumber};
+    \fill[line] (0,0) rectangle (\paperwidth,0.8pt);
+    \pgfmathsetmacro{\progress}{\insertframenumber/\inserttotalframenumber}
+    \fill[amber] (0,0) rectangle (\progress\paperwidth,0.8pt);
+  \end{tikzpicture}%
+}
+
+% Night-sky background for title and media frames.
+\newcommand{\starfield}{%
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+    \fill[navy] (0,0) rectangle (\paperwidth,\paperheight);
+    \begin{scope}
+      \clip (0,0) rectangle (\paperwidth,\paperheight);
+      \shade[inner color=amber!55!navy,outer color=navy] (-6mm,-14mm) circle (48mm);
+      \shade[inner color=violet!35!navy,outer color=navy] ($(\paperwidth,\paperheight)+(8mm,6mm)$) circle (40mm);
+      \pgfmathsetseed{7}
+      \foreach \i in {1,...,160}{
+        \pgfmathsetmacro{\sx}{rnd}
+        \pgfmathsetmacro{\sy}{rnd}
+        \pgfmathsetmacro{\so}{0.15+0.6*rnd}
+        \pgfmathsetmacro{\sr}{0.2+0.45*rnd}
+        \fill[white,opacity=\so] (\sx\paperwidth,\sy\paperheight) circle (\sr pt);
+      }
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+% Use inside a group: { \nightmode \begin{frame}...\end{frame} }
+\newcommand{\nightmode}{%
+  \setbeamertemplate{background}{\starfield}%
+  \setbeamercolor{normal text}{fg=white}%
+  \setbeamercolor{frametitle}{fg=white}%
+  \usebeamercolor[fg]{normal text}%
+}
+
+% TikZ overlay helpers: visible on=<2->
+\tikzset{
+  invisible/.style={opacity=0,text opacity=0},
+  visible on/.style={alt={#1{}{invisible}}},
+  dim on/.style={alt={#1{opacity=0.25,text opacity=0.25}{}}},
+  alt/.code args={<#1>#2#3}{\alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}},
+  card/.style={rounded corners=2mm,fill=white,draw=line,line width=0.6pt},
+  chip/.style={rounded corners=1.2mm,inner xsep=1.6mm,inner ysep=0.9mm,
+    font=\scriptsize\bfseries},
+  flow/.style={-{Stealth[length=2.2mm]},line width=1pt,color=muted},
+}
+
+% Thin frame around a poster/video box; the movie annotation keeps its size.
+\newcommand{\mediaframe}[2][line]{%
+  {\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{1pt}\fcolorbox{#1}{black}{#2}}%
+}
+\newcommand{\chiptag}[2][amber]{\tikz[baseline=(t.base)]\node[chip,fill=#1!18,text=#1!60!black](t){#2};}
+
+\title{One file. Every slide. Every video.}
+\subtitle{Portable multimedia Beamer talks, presented with pdfpc}
+\author{beamerpkg demo}
 \date{}
 
 \begin{document}
 
-\begin{frame}{Normal Beamer stays normal}
-  \begin{columns}[T]
-    \column{0.48\textwidth}
-      \begin{block}{Equation}
-      \[
-        \frac{\partial c}{\partial t} = \nabla\!\cdot\!\left(M\nabla\mu\right)
-      \]
-      \end{block}
-      \pause
-      \begin{itemize}
-        \item equations remain vector PDF;
-        \item overlays remain Beamer pages;
-        \item TikZ remains TikZ.
-      \end{itemize}
-    \column{0.48\textwidth}
-      \begin{tikzpicture}[scale=0.8]
-        \draw[->] (0,0) -- (4,0) node[right] {$x$};
-        \draw[->] (0,0) -- (0,3) node[above] {$y$};
-        \draw[thick] (0.3,0.4) .. controls (1.5,2.8) and (2.5,0.2) .. (3.7,2.4);
+% ---------------------------------------------------------------------------
+{\nightmode
+\begin{frame}[plain]
+  \vfill
+  {\scriptsize\bfseries\color{amber}BEAMER\enspace\textperiodcentered\enspace
+    PDF\enspace\textperiodcentered\enspace MEDIA\enspace\textperiodcentered\enspace PDFPC\par}
+  \vskip4mm
+  {\fontsize{26}{30}\selectfont\bfseries\inserttitle\par}
+  \vskip3mm
+  {\large\color{white!75}\insertsubtitle\par}
+  \vskip9mm
+  \chiptag[sky]{.tex \textrightarrow{} .pdf}\enspace
+  \chiptag[amber]{+ media/*.mp4}\enspace
+  \chiptag[violet]{\textrightarrow{} talk.beamerpkg}
+  \vfill
+  {\scriptsize\color{white!60}Press \textbf{\textrightarrow} to begin. Speaker notes and the
+    timer are on the presenter screen.\par}
+  \vskip6mm
+  % No \pdfpcnote here: page 1 shows the note from examples/demo.pdfpc.
+\end{frame}
+}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{A multimedia talk is secretly a folder}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.47\textwidth}
+      \begin{tikzpicture}
+        \node[card,minimum width=64mm,minimum height=50mm,anchor=north west] (box) at (0,0) {};
+        \node[anchor=north west,font=\small\bfseries,text=muted] at ($(box.north west)+(4mm,-3mm)$) {Today};
+        \node[anchor=north west,font=\ttfamily\footnotesize,align=left,text=ink]
+          at ($(box.north west)+(4mm,-10mm)$)
+          {talk.pdf\\[1mm]
+           \alt<2->{\color{danger!45}}{\color{muted}}media/\\[1mm]
+           \hspace*{4mm}simulation.mp4\only<2->{\color{danger}\sffamily\scriptsize\ \ \textbf{missing}}\\[1mm]
+           \hspace*{4mm}microscope.mp4\only<2->{\color{danger}\sffamily\scriptsize\ \ \textbf{missing}}};
+        \only<2->{
+          \node[anchor=south west,font=\scriptsize,text=danger,align=left]
+            at ($(box.south west)+(4mm,4mm)$)
+            {\textbf{File not found.} Only the PDF made it\\
+             to the conference laptop.};
+        }
+      \end{tikzpicture}
+    \column{0.47\textwidth}
+      \begin{tikzpicture}[visible on=<3->]
+        \node[card,draw=amber,line width=1pt,minimum width=64mm,minimum height=50mm,anchor=north west] (box) at (0,0) {};
+        \node[anchor=north west,font=\small\bfseries,text=amber!80!black] at ($(box.north west)+(4mm,-3mm)$) {With beamerpkg};
+        \node[anchor=north west,font=\ttfamily\large\bfseries,text=navy]
+          at ($(box.north west)+(4mm,-11mm)$) {talk.beamerpkg};
+        \node[anchor=north west,font=\footnotesize,align=left,text width=56mm]
+          at ($(box.north west)+(4mm,-20mm)$)
+          {\textbullet\ one relocatable file\\[0.8mm]
+           \textbullet\ media restored at the same relative paths\\[0.8mm]
+           \textbullet\ sizes and SHA-256 checked before presenting\\[0.8mm]
+           \textbullet\ the PDF itself is untouched};
       \end{tikzpicture}
   \end{columns}
+  \pdfpcnote<1>{Everyone has seen this: the PDF is fine, but the videos live next to it.}
+  \pdfpcnote<2>{Copy only the PDF and the video slides break - usually at the worst moment.}
+  \pdfpcnote<3>{beamerpkg bundles PDF and media into one ZIP container and unpacks it to a temp dir right before pdfpc starts.}
 \end{frame}
 
-\begin{frame}{Lightweight page transition}
-  \transfade[duration=0.2]
+% ---------------------------------------------------------------------------
+\begin{frame}{The pipeline}
   \centering
-  \Large
-  This frame fades in using Beamer's standard PDF transition metadata.
+  \begin{tikzpicture}[
+      stage/.style={card,minimum width=23mm,minimum height=17mm,align=center,font=\small},
+      lbl/.style={font=\tiny\ttfamily,text=muted,above=0.5mm,align=center},
+      capt/.style={font=\scriptsize,text=muted,align=center,text width=27mm,below=2.5mm},
+    ]
+    \node[stage] (tex) {\bfseries talk.tex\\[-0.3mm]\scriptsize\color{muted}your Beamer source};
+    \node[stage,right=11mm of tex,visible on=<2->] (pdf)
+      {\bfseries talk.pdf\\[-0.3mm]\scriptsize\color{muted}+ media/*.mp4};
+    \node[stage,right=11mm of pdf,visible on=<3->,draw=amber,line width=1pt] (pkg)
+      {\bfseries talk.beamerpkg\\[-0.3mm]\scriptsize\color{muted}one ZIP file};
+    \node[stage,right=11mm of pkg,visible on=<4->,fill=navy,draw=navy,text=white] (pc)
+      {\bfseries pdfpc\\[-0.3mm]\scriptsize\color{white!70}two screens};
 
-  \vspace{1em}
-  \normalsize
-  No media packaging or viewer-specific LaTeX helper is involved.
-\end{frame}
+    \draw[flow,visible on=<2->] (tex) -- node[lbl] {pdflatex} (pdf);
+    \draw[flow,visible on=<3->] (pdf) -- node[lbl] {pack} (pkg);
+    \draw[flow,visible on=<4->] (pkg) -- node[lbl] {present} (pc);
 
-\begin{frame}{Manual overlays: lightweight animation}
-  \centering
-  \begin{tikzpicture}[x=2.8cm,y=1cm]
-    \node[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
-      (input) at (0,0) {Input};
-
-    \node<2->[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
-      (model) at (1,0) {Model};
-
-    \node<3->[draw,rounded corners,minimum width=1.8cm,minimum height=0.9cm]
-      (result) at (2,0) {Result};
-
-    \draw<2->[->,thick] (input) -- (model);
-    \draw<3->[->,thick] (model) -- (result);
+    \node[capt] at (tex.south) {unchanged workflow};
+    \node[capt,visible on=<2->] at (pdf.south) {media are ordinary\\\texttt{\textbackslash movie} annotations};
+    \node[capt,visible on=<3->] at (pkg.south) {paths discovered\\from the PDF itself};
+    \node[capt,visible on=<4->] at (pc.south) {unpacked to a temp dir,\\removed afterwards};
   \end{tikzpicture}
 
-  \vspace{1em}
-  \only<1>{State 1: input}
-  \only<2>{State 2: input $\rightarrow$ processing}
-  \only<3>{State 3: input $\rightarrow$ processing $\rightarrow$ result}
+  \vskip9mm
+  \uncover<4->{%
+    \begin{tikzpicture}
+      \node[rounded corners=1.5mm,fill=navy!6,text width=0.86\textwidth,inner sep=3mm,
+            font=\small,align=center]
+        {\textbf{Rendering never leaves Beamer.}\\
+         The package only restores files at the paths the PDF already points to.};
+    \end{tikzpicture}}
+  \pdfpcnote<1>{Start from a normal Beamer source - nothing new to learn.}
+  \pdfpcnote<2>{pdflatex produces an ordinary PDF that refers to external MP4 files.}
+  \pdfpcnote<3>{beamerpkg pack reads the /Movie and pdfpc launch annotations to find the media.}
+  \pdfpcnote<4>{beamerpkg present verifies hashes, extracts, and hands over to pdfpc.}
 \end{frame}
 
-\begin{frame}{Standard Beamer movie: wrapperless discovery}
-  \begin{columns}
-    \column{0.38\textwidth}
-      This is a stock Beamer \texttt{\\movie}. The packer discovers the
-      external MP4 directly from the PDF annotation. In pdfpc it is
-      click-to-play.
-    \column{0.58\textwidth}
-      \movie[loop,showcontrols]
-        {\includegraphics[width=\linewidth]{media/video-poster_big.png}}
-        {media/gemini_generated_video_b2693757.mp4}
+% ---------------------------------------------------------------------------
+\begin{frame}{Beamer stays Beamer}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.46\textwidth}
+      \begin{block}{Cahn--Hilliard equation}
+        \vspace{-2mm}
+        \[
+          \frac{\partial c}{\partial t}
+            = \nabla\cdot\bigl(M\,\nabla\mu\bigr),
+          \qquad
+          \mu = f'(c) - \kappa\,\nabla^2 c
+        \]
+      \end{block}
+      \vskip3mm
+      \begin{itemize}
+        \item<2-> equations stay vector PDF
+        \item<3-> overlays stay Beamer pages
+        \item<4-> TikZ stays TikZ
+        \item<5-> no HTML, no re-rendering
+      \end{itemize}
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[x=48mm,y=85mm]
+        \fill[navy!4,rounded corners=2mm] (-0.12,-0.06) rectangle (1.08,0.5);
+        \draw[-{Stealth[length=1.6mm]},muted] (0,0) -- (1.02,0) node[below left,font=\scriptsize] {$c$};
+        \draw[-{Stealth[length=1.6mm]},muted] (0,0) -- (0,0.46) node[below right,font=\scriptsize] {$f(c)$};
+        \draw[line width=1.4pt,sky,domain=0.02:0.98,samples=80,smooth]
+          plot (\x,{0.04+12*(\x-0.2)^2*(\x-0.8)^2+0.05*\x});
+        \begin{scope}[visible on=<3->]
+          \fill[amber] (0.2,{0.04+0.01}) circle (0.9pt);
+          \fill[amber] (0.8,{0.04+0.04}) circle (0.9pt);
+          \draw[amber,dashed,line width=0.9pt] (0.06,0.043) -- (0.94,0.087);
+          \node[below,font=\scriptsize,text=amber!80!black] at (0.5,0.062) {common tangent};
+        \end{scope}
+        \node[font=\scriptsize,text=muted,visible on=<4->] at (0.5,0.42) {drawn with TikZ};
+      \end{tikzpicture}
   \end{columns}
+  \pdfpcnote<1>{The slide layer is ordinary Beamer: fonts, math, columns, blocks.}
+  \pdfpcnote<3>{This overlay step is just another PDF page. Nothing to replay.}
+  \pdfpcnote<5>{Continuous media is an overlay concern, not a reason to re-render slides.}
 \end{frame}
 
-\begin{frame}{Autoplay video (pdfpc-specific)}
-  \begin{columns}
-    \column{0.38\textwidth}
-      The slide is still ordinary Beamer/PDF. The pdfpc-specific launch link
-      starts the same packaged video automatically and loops it while the slide
-      is shown.
-    \column{0.58\textwidth}
-      \pkgpdfpcmovie[autostart&loop]
-        {\includegraphics[width=\linewidth]{media/video-poster_big.png}}
-        {media/gemini_generated_video_b2693757.mp4}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Back to ordinary overlays}
+% ---------------------------------------------------------------------------
+\begin{frame}{Page transitions are PDF, too}
+  \transfade[duration=0.2]
   \centering
-  \only<1>{Static PDF content.}
-  \only<2>{No HTML renderer involved.}
-  \only<3>{The media layer has not changed slide rendering.}
+  \vskip8mm
+  \begin{tikzpicture}[pg/.style={rounded corners=1mm,minimum width=18mm,minimum height=10mm}]
+    \foreach \o [count=\i] in {0.1,0.3,0.55,0.8}
+      \node[pg,fill=navy,opacity=\o] at (\i*22mm,0) {};
+    \node[pg,fill=navy,text=white,font=\scriptsize\bfseries] at (110mm,0) {this frame};
+    \draw[flow] (13mm,-9mm) -- node[below,font=\tiny\ttfamily,text=muted] {0.2\,s} (119mm,-9mm);
+  \end{tikzpicture}
+  \vskip8mm
+  {\Large\bfseries\color{navy}This frame fades in.\par}
+  \vskip3mm
+  {\small\color{muted}Beamer's standard \texttt{\textbackslash transfade[duration=0.2]} writes PDF
+    transition metadata.\\ No media packaging or viewer-specific helper is involved.\par}
+  \pdfpcnote{A standard Beamer page transition. pdfpc honours it; beamerpkg does not need to know about it.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Manual overlays: lightweight animation}
+  \centering
+  \vskip8mm
+  \begin{tikzpicture}[
+      stage/.style={card,minimum width=30mm,minimum height=15mm,font=\bfseries},
+    ]
+    \node[stage] (input) at (0,0) {Input};
+    \node[stage,visible on=<2->] (model) at (45mm,0) {Model};
+    \node[stage,visible on=<3->,fill=navy,draw=navy,text=white] (result) at (90mm,0) {Result};
+    \draw[flow,visible on=<2->] (input) -- (model);
+    \draw[flow,visible on=<3->] (model) -- (result);
+  \end{tikzpicture}
+  \vskip10mm
+  {\small
+   \only<1>{State 1: input}%
+   \only<2>{State 2: input \textrightarrow{} processing}%
+   \only<3>{State 3: input \textrightarrow{} processing \textrightarrow{} result}\par}
+  \vskip4mm
+  {\scriptsize\color{muted}Each state is a PDF page: step back with the arrow keys at any time.\par}
+  \pdfpcnote{Manual, reversible overlays. No transduration: timed pages restart their timer when revisited, which makes backward navigation jump forward again.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Click to play: a stock Beamer \texttt{\textbackslash movie}}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.36\textwidth}
+      \chiptag[sky]{portable}\enspace\chiptag[muted]{click-to-play}
+      \vskip4mm
+      {\small Plays inside the poster rectangle in any viewer that
+       understands \texttt{/Movie} annotations.\par}
+      \vskip4mm
+      \begin{tikzpicture}
+        \node[rounded corners=1.5mm,fill=navy,text=white,inner sep=2.5mm,
+              font=\ttfamily\scriptsize,align=left,text width=0.88\columnwidth]
+          {\color{sky}\textbackslash usepackage\color{white}\{multimedia\}\\[1.5mm]
+           \color{sky}\textbackslash movie\color{white}[loop,showcontrols]\\
+           \ \ \{\textbackslash includegraphics\{poster\}\}\\
+           \ \ \{media/video.mp4\}};
+      \end{tikzpicture}
+      \vskip3mm
+      {\scriptsize\color{muted}No beamerpkg macro needed.\par}
+    \column{0.6\textwidth}
+      \raggedleft
+      \mediaframe{%
+        \movie[loop,showcontrols]
+          {\includegraphics[width=0.97\columnwidth]{media/video-poster_big.png}}
+          {media/gemini_generated_video_b2693757.mp4}}
+  \end{columns}
+  \pdfpcnote{Click the poster to start the video. This is plain multimedia/movie - wrapperless discovery picks it up.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+{\nightmode
+\begin{frame}{Autoplay and loop, pdfpc style}
+  \vskip-1mm
+  \centering
+  \mediaframe[white!25!navy]{%
+    \pkgpdfpcmovie[autostart&loop]
+      {\includegraphics[width=0.58\paperwidth]{media/video-poster_big.png}}
+      {media/gemini_generated_video_b2693757.mp4}}
+  \par\vskip2.5mm
+  {\scriptsize\color{white!70}%
+    \chiptag[amber]{pdfpc only}\enspace
+    {\ttfamily\textbackslash pkgpdfpcmovie[autostart\&loop]\{poster\}\{media/video.mp4\}}\par}
+  \pdfpcnote{The video starts by itself and loops while the slide is shown.\\Autoplay is a viewer feature, so it lives in a pdfpc run: launch link, not in the container format.}
+\end{frame}
+}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Two screens, one presenter}
+  \centering
+  \begin{tikzpicture}[
+      scr/.style={rounded corners=1.5mm,fill=navy,draw=navy},
+      pane/.style={rounded corners=0.8mm},
+      capt/.style={font=\scriptsize,text=muted,align=center},
+    ]
+    % audience
+    \node[scr,minimum width=54mm,minimum height=32mm] (aud) at (0,0) {};
+    \node[pane,fill=paper,minimum width=50mm,minimum height=28mm] at (aud) {};
+    \node[font=\scriptsize\bfseries,text=navy] at ($(aud)+(0,6mm)$) {current slide};
+    \fill[amber] ($(aud)+(-14mm,1mm)$) rectangle ++(28mm,0.6mm);
+    \fill[line] ($(aud)+(-14mm,-4mm)$) rectangle ++(20mm,0.8mm);
+    \fill[line] ($(aud)+(-14mm,-7mm)$) rectangle ++(24mm,0.8mm);
+    \node[capt,below=2mm of aud] {\textbf{Projector}\\audience sees the slide only};
+
+    % presenter
+    \node[scr,minimum width=70mm,minimum height=38mm] (pre) at (72mm,0) {};
+    \node[pane,fill=paper,minimum width=33mm,minimum height=19mm,anchor=north west]
+      (cur) at ($(pre.north west)+(2.5mm,-2.5mm)$) {};
+    \node[font=\tiny\bfseries,text=navy] at (cur) {current};
+    \node[pane,fill=paper!70!navy,minimum width=22mm,minimum height=12.5mm,anchor=north west]
+      (nxt) at ($(cur.north east)+(3mm,0)$) {};
+    \node[font=\tiny,text=white!80] at (nxt) {next};
+    \node[pane,fill=navylight,minimum width=65mm,minimum height=14mm,anchor=north west]
+      (notes) at ($(cur.south west)+(0,-1.5mm)$) {};
+    \node[anchor=north west,font=\tiny,text=white!85,align=left]
+      at ($(notes.north west)+(1.5mm,-1mm)$)
+      {\textbf{\color{amber}notes}\\the text you are reading right now\\comes from \texttt{\textbackslash pdfpcnote}};
+    \node[font=\footnotesize\bfseries\ttfamily,text=amber] at ($(nxt.south)+(0,-3.5mm)$) {07:42};
+    \node[capt,below=2mm of pre] {\textbf{Laptop}\\notes, next slide, countdown};
+
+    \draw[flow,{Stealth[length=2mm]}-{Stealth[length=2mm]},line width=0.8pt]
+      ($(aud.east)+(2mm,0)$) -- node[above,font=\tiny\ttfamily,text=muted] {pdfpc} ($(pre.west)-(2mm,0)$);
+  \end{tikzpicture}
+
+  \vskip2mm
+  {\footnotesize Notes are hidden PDF annotations from the \texttt{pdfpc} LaTeX package,
+   so they travel \alert{inside} \texttt{talk.pdf} \textemdash{} and therefore inside the package.\par}
+  \pdfpcnote{Hello from the presenter screen!\\These notes are embedded with the pdfpc LaTeX package.\\The countdown comes from duration=10 in the preamble.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Inside a \texttt{.beamerpkg}}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.5\textwidth}
+      \begin{tikzpicture}[
+          f/.style={anchor=west,font=\ttfamily\small,inner sep=1.2mm,rounded corners=1mm},
+          y=7.5mm]
+        \node[f,font=\ttfamily\bfseries] at (0,0) {talk.beamerpkg};
+        \draw[muted] (2mm,-2.5mm) -- (2mm,-4*7.5mm);
+        \foreach \yy in {1,2,3,4} \draw[muted] (2mm,-\yy) -- (5mm,-\yy);
+        \draw[muted] (8mm,-4.35) -- (8mm,-5) -- (11mm,-5);
+        \node[f,alt=<2>{fill=amber!25}{}] at (5mm,-1) {manifest.json};
+        \node[f,alt=<3>{fill=sky!25}{}] at (5mm,-2) {talk.pdf};
+        \node[f,text=muted,alt=<4>{fill=violet!25}{}] at (5mm,-3) {talk.pdfpc};
+        \node[f,alt=<5>{fill=amber!25}{}] at (5mm,-4) {media/};
+        \node[f,alt=<5>{fill=amber!25}{}] at (11mm,-5) {simulation.mp4};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{tikzpicture}
+        \node[card,text width=0.86\columnwidth,inner sep=4mm,align=left,font=\small,minimum height=34mm] {%
+          \only<1>{\textbf{An ordinary ZIP archive.}\\[1.5mm]
+                   Open it with any unzip tool \textemdash{} there is no proprietary format.}%
+          \only<2>{\textbf{\color{amber!80!black}manifest.json}\\[1.5mm]
+                   Byte size and SHA-256 of every file, checked before anything is shown.}%
+          \only<3>{\textbf{\color{sky!70!black}talk.pdf}\\[1.5mm]
+                   Exactly the file pdflatex produced \textemdash{} including these notes.}%
+          \only<4>{\textbf{\color{violet!80!black}talk.pdfpc}\\[1.5mm]
+                   Optional pdfpc sidecar, packed automatically when it exists.}%
+          \only<5>{\textbf{\color{amber!80!black}media/}\\[1.5mm]
+                   Stored at the same relative path the PDF uses. Paths that escape the
+                   project root are rejected.}%
+        };
+      \end{tikzpicture}
+  \end{columns}
+  \pdfpcnote<1>{A beamerpkg is just a ZIP - easy to inspect and debug.}
+  \pdfpcnote<2>{The manifest makes corruption visible before the talk starts.}
+  \pdfpcnote<5>{Fail closed: nothing may escape the extraction directory.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\begin{frame}{Try it}
+  \centering
+  \begin{tikzpicture}
+    \node[rounded corners=2mm,fill=navy,inner sep=0pt,minimum width=0.9\textwidth,
+          minimum height=38mm] (term) {};
+    \foreach \c [count=\i] in {danger,amber,sky}
+      \fill[\c] ($(term.north west)+(1mm+\i*3.2mm,-3mm)$) circle (0.9mm);
+    \node[anchor=north west,font=\ttfamily\footnotesize,text=white,align=left]
+      at ($(term.north west)+(5mm,-7mm)$)
+      {\color{white!50}\# build the PDF and the package\\
+       \color{amber}\$\ \color{white}./examples/build\_demo.sh\\[2.2mm]
+       \color{white!50}\# what is inside?\\
+       \color{amber}\$\ \color{white}poetry run beamerpkg inspect examples/demo.beamerpkg\\[2.2mm]
+       \color{white!50}\# present on two screens\\
+       \color{amber}\$\ \color{white}poetry run beamerpkg present examples/demo.beamerpkg};
+  \end{tikzpicture}
+
+  \vskip6mm
+  \chiptag[sky]{keep writing Beamer}\quad
+  \chiptag[amber]{ship one file}\quad
+  \chiptag[violet]{present with pdfpc}
+  \pdfpcnote{Three commands: build, inspect, present.\\Questions?}
 \end{frame}
 
 \end{document}

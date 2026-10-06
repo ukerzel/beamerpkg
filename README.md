@@ -232,6 +232,12 @@ poetry run beamerpkg present examples/demo.beamerpkg
 poetry run beamerpkg present examples/wrapperless.beamerpkg
 ```
 
+`examples/demo.tex` also embeds speaker notes and a 10-minute countdown via
+the standard `pdfpc` LaTeX package, so they travel inside the PDF itself. The
+title page deliberately has no embedded note: pdfpc lets an embedded note
+replace the sidecar note for the same page, so page 1 keeps showing the
+`examples/demo.pdfpc` note and both routes can be checked in presenter view.
+
 `examples/wrapperless.tex` imports only Beamer's `multimedia` package. It is
 the integration proof that packaging no longer depends on a Beamerpkg-specific
 LaTeX command. In pdfpc this wrapperless example is click-to-start.
