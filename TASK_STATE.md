@@ -52,7 +52,7 @@ Implemented for 0.3.0:
 - extraction restores the editable source tree alongside runtime presentation
   files;
 - the demo packages its LaTeX source, full-size assets, and
-  `tex/beamerpkg.sty`.
+  `src/beamerpkg/tex/beamerpkg.sty`.
 
 ## Current version
 

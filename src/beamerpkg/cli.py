@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from importlib.resources import files
 from pathlib import Path
 
 from .package import PackageError, extract_package, inspect_package, pack_package
@@ -52,6 +53,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="presenter executable (default: pdfpc)",
     )
 
+    subparsers.add_parser(
+        "texdir",
+        help="print the directory containing beamerpkg.sty (for TEXINPUTS)",
+    )
+
     return parser
 
 
@@ -88,6 +94,11 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
         print(f"source files: {len(source['files'])}")
     for asset in assets:
         print(f"  OK  {asset['path']}  {asset['size']} bytes")
+    return 0
+
+
+def _cmd_texdir(args: argparse.Namespace) -> int:
+    print(Path(str(files("beamerpkg") / "tex")).resolve())
     return 0
 
 
@@ -146,6 +157,8 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_inspect(args)
         if args.command == "present":
             return _cmd_present(args)
+        if args.command == "texdir":
+            return _cmd_texdir(args)
     except PackageError as exc:
         print(f"beamerpkg: {exc}", file=sys.stderr)
         return 2

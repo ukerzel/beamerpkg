@@ -132,13 +132,22 @@ poetry run beamerpkg pack talk.pdf --root . --assets talk.beamerpkg-assets
 ## pdfpc autoplay
 
 Autoplay is viewer-specific rather than part of the container format. For pdfpc,
-`tex/beamerpkg.sty` provides:
+the bundled LaTeX helper `beamerpkg.sty` provides:
 
 ```latex
 \pkgpdfpcmovie[autostart&loop]
   {\includegraphics[width=\linewidth]{media/poster.png}}
   {media/video.mp4}
 ```
+
+The helper ships with the Python package. `beamerpkg texdir` prints its
+directory, so LaTeX can find it without copying files:
+
+```bash
+TEXINPUTS="$(beamerpkg texdir)//:" pdflatex talk.tex
+```
+
+In a repository checkout it lives at `src/beamerpkg/tex/beamerpkg.sty`.
 
 This emits pdfpc's `run:` launch-link mechanism. The packer also recognizes
 these pdfpc media launch links and strips their query options when collecting
@@ -207,7 +216,7 @@ editable source snapshot:
 - `examples/demo.pdfpc` (speaker notes / pdfpc metadata)
 - `source/examples/demo.tex`
 - `source/examples/media/...`
-- `source/tex/beamerpkg.sty`
+- `source/src/beamerpkg/tex/beamerpkg.sty`
 
 The mixed demo also contains two lightweight Beamer/PDF motion examples before
 the video slides:
@@ -247,5 +256,5 @@ standard wrapperless `\movie` slide that is click-to-start, followed by one
 pdfpc-specific `\pkgpdfpcmovie[autostart&loop]` slide that starts
 automatically.
 
-See [`docs/MVP.md`](docs/MVP.md) for the original acceptance test and
-[`docs/NEXT_STEPS.md`](docs/NEXT_STEPS.md) for the remaining work.
+See [`docs/MVP.md`](https://github.com/ukerzel/beamerpkg/blob/main/docs/MVP.md) for the original acceptance test and
+[`docs/NEXT_STEPS.md`](https://github.com/ukerzel/beamerpkg/blob/main/docs/NEXT_STEPS.md) for the remaining work.

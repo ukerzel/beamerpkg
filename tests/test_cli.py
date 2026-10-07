@@ -98,3 +98,11 @@ def test_present_forwards_unknown_args_when_poetry_strips_separator(
 
     assert cli.main(["present", str(package), "-w", "both"]) == 0
     assert observed["command"] == ["/usr/bin/pdfpc", "-w", "both", "talk.pdf"]
+
+
+def test_texdir_prints_directory_with_shipped_latex_helper(capsys) -> None:
+    assert cli.main(["texdir"]) == 0
+
+    texdir = Path(capsys.readouterr().out.strip())
+    assert texdir.is_absolute()
+    assert (texdir / "beamerpkg.sty").is_file()

@@ -42,7 +42,7 @@ A `.beamerpkg` file is an ordinary ZIP archive containing:
 
 ## LaTeX scope used by the MVP
 
-`tex/beamerpkg.sty` provides `\pkgmovie`. It delegates layout and annotation
+`beamerpkg.sty` (now `src/beamerpkg/tex/beamerpkg.sty`) provides `\pkgmovie`. It delegates layout and annotation
 creation to Beamer's existing `multimedia` package and additionally writes the
 movie path to `<jobname>.beamerpkg-assets`.
 
@@ -86,3 +86,14 @@ Beamer/PDF rendering
 The next question is no longer whether the container works. It is whether
 `beamerpkg pack` can discover the media references from an ordinary Beamer PDF
 so authors can keep using standard `\movie` without `\pkgmovie`.
+
+## Distribution (1.0.1)
+
+Requirement: a `pip install beamerpkg` user must be able to use
+`\pkgpdfpcmovie` for pdfpc autoplay. Before 1.0.1 the helper lived only in the
+repository's `tex/` directory and was absent from the wheel, so PyPI users could
+pack and present but not author autoplay slides.
+
+Minimal extension: `beamerpkg.sty` moves into the Python package as package
+data, and `beamerpkg texdir` prints its directory for `TEXINPUTS`. No LaTeX
+installation step, TDS layout, or configuration is introduced.

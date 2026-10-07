@@ -15,8 +15,8 @@ do
   fi
 done
 
-TEXINPUTS="../tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
-TEXINPUTS="../tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
+TEXINPUTS="../src/beamerpkg/tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
+TEXINPUTS="../src/beamerpkg/tex//:${TEXINPUTS:-}" pdflatex -interaction=nonstopmode -halt-on-error demo.tex >/dev/null
 
 # Prove that packaging no longer depends on the LaTeX sidecar.
 rm -f demo.beamerpkg-assets
@@ -27,7 +27,7 @@ poetry -C "$REPO_ROOT" run beamerpkg pack \
   --source "examples/demo.tex" \
   --source "examples/media/gemini_generated_video_b2693757.mp4" \
   --source "examples/media/video-poster_big.png" \
-  --source "tex/beamerpkg.sty" \
+  --source "src/beamerpkg/tex/beamerpkg.sty" \
   --output "$SCRIPT_DIR/demo.beamerpkg"
 
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
