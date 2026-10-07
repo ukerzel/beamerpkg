@@ -4,6 +4,9 @@
 \IfFileExists{FiraSans.sty}{\usepackage[sfdefault]{FiraSans}}{}
 \IfFileExists{FiraMono.sty}{\usepackage[scale=0.9]{FiraMono}}{}
 \usepackage{amsmath}
+\usepackage{slashed}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,shapes.misc}
 \usepackage{beamerpkg}
@@ -227,41 +230,56 @@
 \begin{frame}{Beamer stays Beamer}
   \begin{columns}[T,onlytextwidth]
     \column{0.46\textwidth}
-      \begin{block}{Cahn--Hilliard equation}
-        \vspace{-2mm}
+      \begin{block}{Standard Model Lagrangian}
+        \small\setlength{\abovedisplayskip}{1mm}\setlength{\belowdisplayskip}{0mm}
         \[
-          \frac{\partial c}{\partial t}
-            = \nabla\cdot\bigl(M\,\nabla\mu\bigr),
-          \qquad
-          \mu = f'(c) - \kappa\,\nabla^2 c
+          \begin{aligned}
+            \mathcal{L} &= -\tfrac14\, F_{\mu\nu}F^{\mu\nu} \\
+              &\quad + i\,\bar\psi\,\slashed{D}\,\psi + \text{h.c.} \\
+              &\quad + \bar\psi_i\, y_{ij}\, \psi_j\, \phi + \text{h.c.} \\
+              &\quad + \lvert D_\mu \phi\rvert^2 - V(\phi)
+          \end{aligned}
         \]
       \end{block}
-      \vskip3mm
-      \begin{itemize}
+      \vskip1mm
+      \begin{itemize}\small
         \item<2-> equations stay vector PDF
         \item<3-> overlays stay Beamer pages
-        \item<4-> TikZ stays TikZ
+        \item<4-> pgfplots stays pgfplots
         \item<5-> no HTML, no re-rendering
       \end{itemize}
-    \column{0.5\textwidth}
+    \column{0.52\textwidth}
       \centering
-      \begin{tikzpicture}[x=48mm,y=85mm]
-        \fill[navy!4,rounded corners=2mm] (-0.12,-0.06) rectangle (1.08,0.5);
-        \draw[-{Stealth[length=1.6mm]},muted] (0,0) -- (1.02,0) node[below left,font=\scriptsize] {$c$};
-        \draw[-{Stealth[length=1.6mm]},muted] (0,0) -- (0,0.46) node[below right,font=\scriptsize] {$f(c)$};
-        \draw[line width=1.4pt,sky,domain=0.02:0.98,samples=80,smooth]
-          plot (\x,{0.04+12*(\x-0.2)^2*(\x-0.8)^2+0.05*\x});
-        \begin{scope}[visible on=<3->]
-          \fill[amber] (0.2,{0.04+0.01}) circle (0.9pt);
-          \fill[amber] (0.8,{0.04+0.04}) circle (0.9pt);
-          \draw[amber,dashed,line width=0.9pt] (0.06,0.043) -- (0.94,0.087);
-          \node[below,font=\scriptsize,text=amber!80!black] at (0.5,0.062) {common tangent};
-        \end{scope}
-        \node[font=\scriptsize,text=muted,visible on=<4->] at (0.5,0.42) {drawn with TikZ};
-      \end{tikzpicture}
+      \begin{tikzpicture}
+        \begin{axis}[
+            width=1.12\columnwidth, height=0.92\columnwidth,
+            view={30}{38}, axis lines=none, clip=false,
+            plot box ratio={1}{1}{0.42},
+            z buffer=sort, shader=faceted interp,
+            faceted color=white!35, line width=0.08pt,
+            colormap={higgs}{rgb255=(22,38,74) rgb255=(56,189,248) rgb255=(245,165,36)},
+            domain=0:1.4, y domain=0:360, samples=22, samples y=48,
+            xmin=-1.5, xmax=1.5, ymin=-1.5, ymax=1.5, zmin=0, zmax=1.25,
+          ]
+          \addplot3[surf] ({x*cos(y)}, {x*sin(y)}, {(x^2-1)^2});
+          \addplot3[only marks, mark=ball, ball color=white, mark size=2.6pt,
+                    visible on=<3->, dim on=<4->]
+            coordinates {(0,0,1.07)};
+          \addplot3[only marks, mark=ball, ball color=amber, mark size=2.6pt,
+                    visible on=<4->]
+            coordinates {(-0.87,0.5,0.05)};
+        \end{axis}
+      \end{tikzpicture}\\[3mm]
+      {\scriptsize\color{muted}$V(\phi) = \lambda\bigl(\lvert\phi\rvert^2 - \tfrac{v^2}{2}\bigr)^2$\par
+       \vskip0.8mm
+       \only<1-2>{\phantom{$\langle\phi\rangle$}}%
+       \only<3>{\tikz\shade[ball color=white] (0,0) circle (1.1mm);\ $\phi = 0$: symmetric, but unstable}%
+       \only<4->{\tikz\shade[ball color=amber] (0,0) circle (1.1mm);\ {\color{amber!80!black}vacuum
+         $\langle\phi\rangle = v/\sqrt{2}$: symmetry broken}}\par}
   \end{columns}
-  \pdfpcnote<1>{The slide layer is ordinary Beamer: fonts, math, columns, blocks.}
-  \pdfpcnote<3>{This overlay step is just another PDF page. Nothing to replay.}
+  \pdfpcnote<1>{The Standard Model Lagrangian, CERN mug edition - plain amsmath, typeset by Beamer.}
+  \pdfpcnote<3>{Symmetric but unstable: phi = 0 sits on top of the hump. This step is just another PDF page.}
+  \pdfpcnote<4>{The vacuum picks a point in the trough: v/sqrt2 is about 174 GeV. Spontaneous symmetry breaking, rendered by pgfplots.}
   \pdfpcnote<5>{Continuous media is an overlay concern, not a reason to re-render slides.}
 \end{frame}
 
