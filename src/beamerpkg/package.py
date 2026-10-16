@@ -83,16 +83,13 @@ def _select_asset_paths(
     pdf: Path,
     asset_list: Path | None,
 ) -> tuple[PurePosixPath, ...]:
-    """Choose explicit sidecar assets or discover them from PDF annotations."""
+    """Choose explicit sidecar assets or discover them from PDF annotations.
+
+    Media is optional: a PDF without media references packs as PDF-only.
+    """
 
     if asset_list is not None:
-        resolved_asset_list = asset_list.resolve()
-        asset_paths = read_asset_list(resolved_asset_list)
-        if not asset_paths:
-            raise PackageError(
-                f"asset list contains no media paths: {resolved_asset_list}"
-            )
-        return asset_paths
+        return read_asset_list(asset_list.resolve())
 
     try:
         discovered = tuple(
@@ -107,14 +104,9 @@ def _select_asset_paths(
 
     legacy_sidecar = pdf.with_suffix(ASSET_LIST_SUFFIX)
     if legacy_sidecar.is_file():
-        asset_paths = read_asset_list(legacy_sidecar)
-        if asset_paths:
-            return asset_paths
+        return read_asset_list(legacy_sidecar)
 
-    raise PackageError(
-        "no supported external media references found in PDF and no "
-        f"legacy asset list found at {legacy_sidecar}"
-    )
+    return ()
 
 
 def _collect_source_files(

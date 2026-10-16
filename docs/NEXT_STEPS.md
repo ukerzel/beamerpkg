@@ -52,8 +52,7 @@ than introduce a second application architecture.
 
 ## 3. Packaging/release polish
 
-- generate and commit a Poetry lock file from a Poetry-enabled development
-  machine;
+- Poetry lock file included for reproducible development as of 1.2.0;
 - add CI for pytest/Ruff/mypy and the synthetic PDF tests;
 - decide whether the legacy sidecar helper should eventually be deprecated;
 - document supported PDF annotation forms as a small versioned compatibility

@@ -25,6 +25,10 @@ Version 0.2 adds **wrapperless media discovery**: for standard Beamer
 collects the referenced local media automatically. A `.beamerpkg-assets`
 sidecar is no longer required for normal use.
 
+Version 1.2.0 makes media optional. A PDF without movie references packs as
+PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
+`assets` list.
+
 ## Package format
 
 A `.beamerpkg` is an ordinary ZIP archive:

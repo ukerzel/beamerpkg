@@ -97,3 +97,14 @@ pack and present but not author autoplay slides.
 Minimal extension: `beamerpkg.sty` moves into the Python package as package
 data, and `beamerpkg texdir` prints its directory for `TEXINPUTS`. No LaTeX
 installation step, TDS layout, or configuration is introduced.
+
+## Media-optional packing
+
+Requirement: talks without video must still be bundled as one `.beamerpkg`
+(PDF, `.pdfpc` notes, editable source). Previously `pack` failed with "no
+supported external media references found" and rejected empty asset lists, so
+media-free talks could not use the container at all.
+
+Minimal change: when neither PDF discovery, `--assets`, nor the legacy sidecar
+yields media, `pack` produces a package with `"assets": []`. The schema is
+unchanged; `inspect` and `present` already accepted empty asset lists.

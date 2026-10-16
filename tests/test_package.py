@@ -300,3 +300,29 @@ def test_pack_rejects_missing_source_input(tmp_path: Path) -> None:
             source_root=tmp_path,
             sources=(Path("missing.tex"),),
         )
+
+
+def test_pack_without_media_bundles_pdf_only(tmp_path: Path) -> None:
+    pdf = tmp_path / "talk.pdf"
+    _write_annotated_pdf(pdf)
+    pdf.with_suffix(".pdfpc").write_text("{}", encoding="utf-8")
+
+    package = pack_package(pdf, root=tmp_path)
+
+    with zipfile.ZipFile(package) as zf:
+        assert set(zf.namelist()) == {"manifest.json", "talk.pdf", "talk.pdfpc"}
+        assert json.loads(zf.read("manifest.json"))["assets"] == []
+    extracted = tmp_path / "unpacked"
+    extract_package(package, extracted)
+    assert (extracted / "talk.pdf").is_file()
+
+
+def test_pack_accepts_empty_explicit_asset_list(tmp_path: Path) -> None:
+    pdf = tmp_path / "talk.pdf"
+    _write_annotated_pdf(pdf)
+    assets = tmp_path / "talk.beamerpkg-assets"
+    assets.write_text("# no media\n", encoding="utf-8")
+
+    package = pack_package(pdf, root=tmp_path, asset_list=assets)
+
+    assert inspect_package(package)["manifest"]["assets"] == []

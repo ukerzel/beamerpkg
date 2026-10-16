@@ -54,9 +54,23 @@ Implemented for 0.3.0:
 - the demo packages its LaTeX source, full-size assets, and
   `src/beamerpkg/tex/beamerpkg.sty`.
 
+### Optional media
+
+Implemented for 1.2.0 and locally verified:
+
+- PDFs without supported media references pack with an empty `assets` list;
+- empty explicit and legacy asset lists are accepted;
+- PDF-only packages retain optional `.pdfpc` notes and editable source files;
+- relocation and CLI presenter invocation preserve PDF, notes, and source bytes;
+- missing media, unsafe paths, remote references, and unreadable PDFs still fail.
+
+Validation: 19 tests pass; Ruff, mypy, and Poetry lock validation pass. The
+relocated presenter check used a test executable; live pdfpc rendering was not
+retested for this release.
+
 ## Current version
 
-0.3.0.
+1.2.0.
 
 Presenter passthrough accepts both an explicit `--` separator and the
 separator-stripped form produced by `poetry run`.
