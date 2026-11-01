@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+import math
+import re
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from pypdf import PdfReader
+from pypdf.generic import BooleanObject
 
 
 class PdfMediaError(ValueError):
@@ -57,7 +61,9 @@ def discover_pdf_media_references(pdf: Path) -> tuple[str, ...]:
     try:
         reader = PdfReader(str(pdf), strict=False)
     except Exception as exc:
-        raise PdfMediaError(f"failed to read PDF annotations from {pdf}: {exc}") from exc
+        raise PdfMediaError(
+            f"failed to read PDF annotations from {pdf}: {exc}"
+        ) from exc
 
     references: list[str] = []
     seen: set[str] = set()
@@ -92,3 +98,130 @@ def discover_pdf_media_references(pdf: Path) -> tuple[str, ...]:
                 references.append(key)
 
     return tuple(references)
+
+
+@dataclass(frozen=True)
+class MediaPlacement:
+    """One annotation, deliberately not deduplicated by asset path."""
+
+    page_index: int
+    annotation_index: int
+    asset_path: str
+    rect_pdf: tuple[float, float, float, float]
+    kind: str
+    autostart: bool | None
+    loop: bool | None
+    controls: bool | None
+
+
+def _placement_path(raw: str, allowed: set[str]) -> str:
+    path = raw.replace("\\", "/")
+    parts = path.split("/")
+    if (
+        not path
+        or path != path.strip()
+        or PurePosixPath(path).is_absolute()
+        or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path)
+        or any(part in ("", ".", "..") for part in parts)
+        or any(ord(c) < 32 for c in path)
+    ):
+        raise PdfMediaError("unsafe spatial media path")
+    if path not in allowed:
+        raise PdfMediaError("spatial media path is absent from validated manifest")
+    return path
+
+
+def discover_pdf_media_placements(
+    pdf: Path, allowed_assets: set[str]
+) -> tuple[MediaPlacement, ...]:
+    """Inspect supported local placements without executing PDF actions.
+
+    The caller supplies paths from the already validated manifest. Unknown flags
+    remain None; unsupported encoded playback semantics fail visibly.
+    """
+    placements: list[MediaPlacement] = []
+    try:
+        reader = PdfReader(str(pdf), strict=False)
+        for page_index, page in enumerate(reader.pages):
+            for annotation_index, reference in enumerate(
+                _resolve(page.get("/Annots")) or []
+            ):
+                annotation = _resolve(reference)
+                if not isinstance(annotation, dict):
+                    continue
+                kind = "movie"
+                autoplay = loop = controls = None
+                raw: str | None = None
+                action = _resolve(annotation.get("/A"))
+                if annotation.get("/Subtype") == "/Movie":
+                    movie = _resolve(annotation.get("/Movie"))
+                    if not isinstance(movie, dict):
+                        raise PdfMediaError("invalid movie dictionary")
+                    raw = _file_spec_text(movie.get("/F"))
+                    if isinstance(action, dict):
+                        if set(action) - {"/Mode", "/ShowControls"}:
+                            raise PdfMediaError("unsupported movie playback options")
+                        mode = action.get("/Mode")
+                        if mode is not None:
+                            if mode not in ("/Repeat", "/Once"):
+                                raise PdfMediaError("unsupported movie playback mode")
+                            loop = mode == "/Repeat"
+                        value = action.get("/ShowControls")
+                        if value is not None:
+                            if not isinstance(value, (bool, BooleanObject)):
+                                raise PdfMediaError("invalid movie controls option")
+                            controls = bool(value)
+                elif (
+                    annotation.get("/Subtype") == "/Link"
+                    and isinstance(action, dict)
+                    and action.get("/S") == "/Launch"
+                ):
+                    target = _file_spec_text(action.get("/F"))
+                    if target is None or _pdfpc_launch_media_reference(target) is None:
+                        continue
+                    raw, _, query = target.partition("?")
+                    options = query.split("&")
+                    if len(set(options)) != len(options) or any(
+                        v not in {"autostart", "loop"} for v in options
+                    ):
+                        raise PdfMediaError("unsupported pdfpc media options")
+                    kind = "pdfpc_launch"
+                    autoplay = True if "autostart" in options else None
+                    loop = True if "loop" in options else None
+                else:
+                    continue
+                if raw is None:
+                    raise PdfMediaError("missing movie asset path")
+                asset = _placement_path(raw, allowed_assets)
+                rect = _resolve(annotation.get("/Rect"))
+                if not isinstance(rect, (list, tuple)) or len(rect) != 4:
+                    raise PdfMediaError("missing or invalid media rectangle")
+                if any(isinstance(v, (bool, BooleanObject, str)) for v in rect):
+                    raise PdfMediaError("nonnumeric media rectangle")
+                x0, y0, x1, y1 = (float(v) for v in rect)
+                if not all(math.isfinite(v) for v in (x0, y0, x1, y1)):
+                    raise PdfMediaError("nonfinite media rectangle")
+                box = page.cropbox
+                if min(max(x0, x1), float(box.right)) <= max(
+                    min(x0, x1), float(box.left)
+                ) or min(max(y0, y1), float(box.top)) <= max(
+                    min(y0, y1), float(box.bottom)
+                ):
+                    raise PdfMediaError("empty visible media rectangle")
+                placements.append(
+                    MediaPlacement(
+                        page_index,
+                        annotation_index,
+                        asset,
+                        (x0, y0, x1, y1),
+                        kind,
+                        autoplay,
+                        loop,
+                        controls,
+                    )
+                )
+    except PdfMediaError:
+        raise
+    except Exception as exc:
+        raise PdfMediaError(f"failed to inspect spatial PDF: {exc}") from exc
+    return tuple(placements)

@@ -78,11 +78,13 @@ separator-stripped form produced by `poetry run`.
 ## Next
 
 On `feat/spatial-prototype`, execute the user-authorized first spatial MVP in
-`docs/SPATIAL_MVP.md`; Active Batch is in `issues.md`. S0 plan/cold read is
-prepared, pending validation and commit/push before S1. The branch starts at
+`docs/SPATIAL_MVP.md`; Active Batch is in `issues.md`. S0 plan/cold read was
+published as `2fa9f70`. S1 admission/model/media implementation passes 22
+focused tests and 41 total tests, Ruff and mypy (six source files). Next:
+S1 commit/push, then S2 browser feasibility. The branch starts at
 `2e86c6f3be328f6c55d42ac0d792084d1372e95d`. `main` remains unchanged.
 
-Publication initially needs a configured same-name upstream. Keep unrelated
+The user configured `origin/feat/spatial-prototype` as upstream. Keep unrelated
 untracked `examples/wrapperless.pdf` out of scoped commits. No release/merge or
 full editor is authorized. Existing-route desktop/release polish remains
 deferred in `docs/NEXT_STEPS.md`.
