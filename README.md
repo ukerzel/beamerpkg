@@ -29,6 +29,29 @@ Version 1.2.0 makes media optional. A PDF without movie references packs as
 PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 `assets` list.
 
+### Optional spatial prototype (feature branch)
+
+`feat/spatial-prototype` adds a read-only spatial presentation route while
+retaining the existing pdfpc route:
+
+```bash
+beamerpkg present talk.beamerpkg   # existing pdfpc presentation
+beamerpkg spatial talk.beamerpkg   # optional local browser presentation
+```
+
+Choose either route or both per talk. Spatial mode supports explicit overlay
+groups, whole-frame/detail viewpoints, guided paths, exploration/return, and
+the two existing packaged-video forms. A saved spatial arrangement uses an
+adjacent `talk.spatial.json`; the v1 archive remains unchanged. There is no
+graphical editor or write API in this first MVP.
+
+The prototype is on this branch, not a new PyPI release. From a checkout, build
+the pinned frontend before using `spatial`; built wheels include its offline
+assets and need no end-user Node/npm or pdfpc. See the
+[try-it guide](docs/spatial/USER_GUIDE.md),
+[first-MVP contract](docs/SPATIAL_MVP.md), and
+[technical evaluation](docs/spatial/PROTOTYPE_EVALUATION.md).
+
 ## Package format
 
 A `.beamerpkg` is an ordinary ZIP archive:

@@ -1,0 +1,16 @@
+[
+  {
+    "file": "beamerpkg-1.2.0-py3-none-any.whl",
+    "size": 16838,
+    "sha256": "8fca3e690262eb96455888b973a95cfcd56d63d22a818398ef62b8e4e12582af",
+    "source": "PyPI 1.2.0 published artifact",
+    "verified_against": "https://pypi.org/pypi/beamerpkg/1.2.0/json"
+  },
+  {
+    "file": "beamerpkg-1.2.0.tar.gz",
+    "size": 17564,
+    "sha256": "9f96c3cf927459d5e9314e274370cb817260291f81a1b62399b1e7f4e028370b",
+    "source": "PyPI 1.2.0 published artifact",
+    "verified_against": "https://pypi.org/pypi/beamerpkg/1.2.0/json"
+  }
+]

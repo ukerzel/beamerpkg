@@ -1,0 +1,67 @@
+{
+  "source_base_commit": "af80080b442da00b36ccba302c5a5f2b49c675dd",
+  "working_tree_source_sha256": {
+    "src/beamerpkg/__init__.py": "3797bf54247b532c766173e2f9713356f0865cec9886006c359e245d144427c4",
+    "src/beamerpkg/cli.py": "2f21a9b0ce73bfbc99bf044502e888675fd600f6b23abd57bbc9e3b78844df8b",
+    "src/beamerpkg/package.py": "af429561f7c1065d0f4935db5e6ffd93791b43cf3d5d444b823458b0d3998766",
+    "src/beamerpkg/pdf_media.py": "89b39099d9738b530a4290258a7463859780374e5f2069d5a71ab1c7272d1da7",
+    "src/beamerpkg/spatial_model.py": "fa22f42ab9881fcb5938cff0bb0af0128eea45c7b6049c4428ab5230aeabd4ca",
+    "src/beamerpkg/spatial_project.py": "1ad382d5239577de0c7ce20696ba0817c9a6c1fa6627cb73d5fb42c4b2a2735e",
+    "src/beamerpkg/spatial_server.py": "e6aa6ff42b2a95a72768804712f9857ba3081d1947018cbc7829798f05845bcb",
+    "frontend/spatial/src/main.tsx": "95d40d8cb2594467c2acd701f59417531ffd8690211ec86b66bca3df142bae9f",
+    "frontend/spatial/src/media.ts": "dca5cd1eee79f3527e2321cb5cedb92ab8d280af70b35eee23938cf45a505a39",
+    "frontend/spatial/src/model.ts": "3f97db13d309dfc8346911cff8beb1395b08b3bec62652df57e0c585dd085c29",
+    "frontend/spatial/src/navigation.ts": "f44ab1b3a79cb07117d94bf955d3797a9c28be71c69d4685c3cfbca64158e39c",
+    "frontend/spatial/src/pdf.ts": "8cbb79d9e2e1d748c7421a703cda641a83fa61e956f8e64abc1479922f785863",
+    "frontend/spatial/src/probe.tsx": "6edf1a6361608702ba16a1784ed989b82f318e71f1a0aafe289687bc1d11176c",
+    "frontend/spatial/src/rendering.ts": "59e05ce925fc577c9ed35648ed295bd3aba25cdae6ad4eaef7ded1d8364c88d1",
+    "frontend/spatial/src/style.css": "f4f8a9bc70adba0be90823509255bed0ed26bb2d6e1b8c51b43742637635fdc4"
+  },
+  "wheel": {
+    "name": "beamerpkg-1.2.0-py3-none-any.whl",
+    "sha256": "2574737394bfd715366069d5528ea3ecf9656730700b4034937307c44c6a67cf",
+    "size": 2764351,
+    "members": 219
+  },
+  "sdist": {
+    "name": "beamerpkg-1.2.0.tar.gz",
+    "sha256": "ff58f0ec806e4283c2a46f8016a6f2afbbbb50a59750d586e29b1119b4fdc0be",
+    "size": 2620331,
+    "members": 218
+  },
+  "installed_module_outside_checkout": true,
+  "installed_module_sha256": "e6aa6ff42b2a95a72768804712f9857ba3081d1947018cbc7829798f05845bcb",
+  "runtime_path_has_node_npm_pdfpc": false,
+  "installation": "no-index, no-deps, local wheel + cached pypdf wheel",
+  "pypdf": "6.19.0",
+  "archive_unchanged": true,
+  "invalid_sidecar_ignored_by_inspect": true,
+  "invalid_sidecar_rejected_by_spatial": true,
+  "presenter_test": {
+    "arguments": [
+      "-w",
+      "both",
+      "science.pdf"
+    ],
+    "pdf_exists": true
+  },
+  "presenter_evidence_scope": "fake subprocess; no live pdfpc rendering claim",
+  "media_range": "bytes 0-31/7852006",
+  "temporary_files_removed": true,
+  "browser": {
+    "version": "156.0.8078.4",
+    "viewport": {
+      "width": 1360,
+      "height": 900
+    },
+    "devicePixelRatio": 1,
+    "external_network_policy": "all non-loopback-endpoint requests aborted; not OS network isolation",
+    "external_attempts": [],
+    "page_errors": [],
+    "actual_mp4_duration_seconds": 10.005,
+    "media_206_responses": 5,
+    "same_video_after_detail": true,
+    "paused_after_overview_and_restore": true,
+    "visible_canvas_bytes": 1382404
+  }
+}

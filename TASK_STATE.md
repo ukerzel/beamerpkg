@@ -77,21 +77,32 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
-On `feat/spatial-prototype`, execute the user-authorized first spatial MVP in
-`docs/SPATIAL_MVP.md`; Active Batch is in `issues.md`. S0 plan/cold read was
-published as `2fa9f70`. S1 admission/model/media implementation passes 22
-focused tests and 41 total tests, Ruff and mypy (six source files). Next:
-S1 published as `20bd4de`. S2 browser feasibility passes with both adapters;
-DOM selected in ADR-001. S2 published as `1b41ff0`; S3 read-only server/CLI and
-viewer passes 57 Python and 18 frontend tests, Ruff/mypy, Poetry lock and
-production build. S3 published as `5450649`. S4 is in progress; initial
-installed-wheel proof passed. A follow-up HTTP correction restricts runtime
-serving to referenced media and non-executable MIME handling; requalify the
-final built distribution after that commit/push.
-Evidence: `docs/spatial/S3_REPORT.md`. The branch starts at
-`2e86c6f3be328f6c55d42ac0d792084d1372e95d`. `main` remains unchanged.
+The user-authorized first spatial MVP S0–S4 is technically complete on
+`feat/spatial-prototype`; stop after final S4 commit/push. Human walkthrough
+and the proceed/revise/stop product decision remain pending. No further editor,
+save API, release, or merge is authorized. Active Batch: `issues.md`.
 
-The user configured `origin/feat/spatial-prototype` as upstream. Keep unrelated
-untracked `examples/wrapperless.pdf` out of scoped commits. No release/merge or
-full editor is authorized. Existing-route desktop/release polish remains
-deferred in `docs/NEXT_STEPS.md`.
+Commits: plan/cold read `2fa9f70`, admission/model/media `20bd4de`, browser
+feasibility/DOM decision `1b41ff0`, read-only viewer `5450649`, runtime-asset
+boundary `af80080`. All were pushed to the configured same-name upstream.
+The branch starts at `2e86c6f3be328f6c55d42ac0d792084d1372e95d`;
+`main` and `package.py` remain unchanged.
+
+Final validation: 59 Python tests and 21 frontend tests pass, plus Ruff, mypy
+(seven source files), Poetry lock, TypeScript/build and installed-wheel proof.
+The installed runtime has no Node/npm/pdfpc on PATH; media plays/seeks through
+206 responses, history restores paused, non-local browser requests are blocked,
+and process-private temporary files are removed. No new live pdfpc or human
+lecture claim is made. Evidence/source hashes:
+`docs/spatial/evidence/s4-20261101/distribution.json`.
+
+Try: `poetry run beamerpkg spatial build/spatial-fixtures/science.beamerpkg`.
+Read `docs/spatial/USER_GUIDE.md` and `PROTOTYPE_EVALUATION.md` for limitations.
+Compiled app assets are ignored/rebuildable; preserve them under ignored build/
+before a later main-only build, since generated files are not branch-isolated.
+Experimental wheel/sdist are in `build/spatial-dist`; the published 1.2.0 files
+in dist/ were restored from PyPI and hash-verified after an initial output-path
+mistake. The prototype still has local package version 1.2.0, not a new release.
+
+Preserve unrelated untracked `examples/wrapperless.pdf`. Existing-route
+desktop/release polish remains deferred in `docs/NEXT_STEPS.md`.

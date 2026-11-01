@@ -91,3 +91,33 @@
 - Boundary correction validation: regression first returned 200 instead of
   expected 404; now 59 Python tests pass, including non-executable handling of
   a referenced HTML payload. Ruff and mypy (seven source files) pass.
+
+## 2026-11-01 — S4 installed-distribution proof and named stop
+
+- Runtime-asset follow-up published as `af80080`. Final experimental wheel and
+  sdist built to `build/spatial-dist`; both contain local app/worker/resources,
+  notices and the existing TeX helper. No probe/Node modules are shipped.
+- Final installed proof passes from a fresh no-index environment outside the
+  checkout, with Node/npm/pdfpc absent on runtime PATH. Real relocated MP4
+  plays/seeks through 206 responses, same-instance detail retains the element,
+  overview/history restores paused, original archive bytes remain unchanged,
+  and the foreground server removes its private temporary files on SIGINT.
+- External browser requests are blocked; zero external attempts/page errors.
+  This is browser-request isolation, not OS-level networking isolation. The
+  fake native presenter proves extraction/argument order only.
+- A concurrent-test false cleanup failure used shared /tmp; retained its
+  diagnosis/screenshot and changed the proof to a process-private TMPDIR.
+- Final frontend suite: 21 passed, including HiDPI DPR 2, deep clipped zoom,
+  reduced motion, interrupted focus/sidebar resize, and malformed decode bytes.
+  Python: 59 passed; Ruff/mypy, Poetry lock, strict TS/build passed. Media
+  overlays clip at the page boundary; rotated-video orientation is not qualified.
+- Final receipt binds exact wheel/sdist/source hashes. Immutable evidence:
+  `docs/spatial/evidence/s4-20261101`. Release artifacts restored and verified;
+  no main change, release, merge, or unrelated-PDF mutation.
+- Applied research-surface-triage: keep the selected prototype route, comparison
+  and fixture tools, and evidence in their stated roles. No cleanup/movement or
+  automatic feature promotion follows from that classification.
+- Added try-it/stop instructions and an evidence-limited evaluation. Technical
+  S0–S4 is complete; commit/push final S4 slice, then stop for human walkthrough
+  and the next product decision. Full editor/save and lecturer parity remain
+  deferred rather than silently claimed.

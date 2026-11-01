@@ -91,6 +91,7 @@ header [data-testid='position'] {
 }
 .media-surface {
     pointer-events: none;
+    overflow: hidden;
 }
 .movie {
     position: absolute;

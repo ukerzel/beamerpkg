@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 let server: ChildProcess, endpoint: string;
+test.use({ deviceScaleFactor: 2 });
 test.beforeEach(async ({ page }) => {
     server = spawn(
         'poetry',
@@ -63,6 +64,53 @@ async function focus(page: Page, id: string) {
         .click();
     await page.getByRole('button', { name: 'Views', exact: true }).click();
 }
+
+test('reduced motion, deep detail rerender and canvas bounds at HiDPI', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open(page);
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(page.getByTestId('detail')).toHaveAttribute('data-page', '1');
+    const initialWidth = await page
+        .getByTestId('detail')
+        .evaluate((c: HTMLCanvasElement) => parseFloat(c.style.width));
+    const initialZoom = Number(await page.getByTestId('world').getAttribute('data-zoom'));
+    const stage = await page.getByLabel('Presentation canvas').boundingBox();
+    await page.mouse.move(stage!.x + stage!.width / 2, stage!.y + stage!.height / 2);
+    await page.mouse.wheel(0, -2000);
+    await expect(page.getByTestId('position')).toContainText('exploring');
+    await expect
+        .poll(() =>
+            page
+                .getByTestId('detail')
+                .evaluate((c: HTMLCanvasElement) => parseFloat(c.style.width)),
+        )
+        .toBeLessThan(initialWidth / 2);
+    const detailPixels = await page
+        .getByTestId('detail')
+        .evaluate((c: HTMLCanvasElement) => c.width * c.height);
+    expect(detailPixels).toBeLessThanOrEqual(4_000_000);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('position')).toContainText('guided');
+    await expect
+        .poll(async () => Number(await page.getByTestId('world').getAttribute('data-zoom')))
+        .toBeCloseTo(initialZoom, 6);
+});
+
+test('latest camera target wins over an interrupted focus and sidebar resize', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Views', exact: true }).click();
+    const views = page.getByRole('complementary', { name: 'Viewpoints' });
+    await views.getByRole('button', { name: 'detail', exact: true }).click();
+    await views.getByRole('button', { name: 'v4', exact: true }).click();
+    await page.getByRole('button', { name: 'Views', exact: true }).click();
+    await expect(page.getByTestId('position')).toContainText('v4');
+    await expect
+        .poll(async () => Number(await page.getByTestId('world').getAttribute('data-cx')))
+        .toBeCloseTo(2720, 5);
+    // Wait beyond the 240ms obsolete animation to expose a late snap-back.
+    await page.waitForTimeout(350);
+    expect(Number(await page.getByTestId('world').getAttribute('data-cx'))).toBeCloseTo(2720, 5);
+});
 
 test('guided overlays, detail detours and resize restoration on bundled assets', async ({
     page,
@@ -169,6 +217,16 @@ test('real pdfpc-requested autoplay follows browser policy and stops on page exi
         )
         .toBe(true);
     await expect(page.locator('video')).toHaveCount(0);
+});
+
+test('malformed media bytes produce a visible controlled decode error', async ({ page }) => {
+    await page.route('**/runtime/asset-*', (route) =>
+        route.fulfill({ status: 200, contentType: 'video/mp4', body: 'not a video stream' }),
+    );
+    await open(page);
+    await focus(page, 'v5');
+    await expect(page.getByRole('alert')).toContainText('Video unavailable');
+    expect(await page.locator('video').evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
 });
 
 test('autostart rejection has a working manual fallback, no browser-policy override', async ({

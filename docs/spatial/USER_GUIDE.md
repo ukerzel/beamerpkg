@@ -1,0 +1,139 @@
+# Try the first spatial MVP
+
+This prototype lives on `feat/spatial-prototype`. The published 1.2.0 package
+and `main` retain the existing pdfpc workflow. No release or merge has been made.
+
+## Choose the route per talk
+
+```bash
+beamerpkg present talk.beamerpkg       # existing pdfpc route
+beamerpkg spatial talk.beamerpkg       # optional spatial route
+```
+
+Use either command, or both with one archive. Spatial mode needs a supported
+browser; pdfpc is not required for it. The existing route needs no browser,
+spatial layout, or frontend tooling.
+
+## Build and try the teaching fixture
+
+From this branch's repository root:
+
+```bash
+poetry install
+cd frontend/spatial
+npm ci
+npm run build
+cd ../..
+poetry run python tools/build_spatial_fixtures.py
+poetry run beamerpkg spatial build/spatial-fixtures/science.beamerpkg
+```
+
+Node/npm are development tools used to build the bundled app. A built Python
+wheel includes the app, PDF.js worker and required local resources; its user
+does not need Node/npm. These commands do not overwrite existing example PDFs.
+The fixture builder requires the existing TeX environment and demo video.
+
+The server prints a `http://127.0.0.1:PORT/` URL and opens a browser. If browser
+opening is unavailable, open the displayed URL manually. For headless testing,
+use `--no-browser`. Keep the foreground command running; Ctrl+C stops it and
+removes extracted files. Only the local loopback endpoint is served.
+
+## Present and explore
+
+- Right / Space advances an overlay, then the next path step. Left reverses
+  overlays and steps. A fixed-overlay detail step is one path step.
+- Overview or O shows the canvas silently. Views selects a whole-frame/detail
+  target for a temporary detour. Double-click a frame to focus it.
+- Drag to pan; wheel to zoom. Exploring keeps the guided resume point.
+- Escape / Return unwinds one detour. In exploration, a presentation arrow
+  returns to the guided resume point without advancing; press again to advance.
+- Play starts video in its PDF rectangle. Camera/detail changes on the same
+  active instance retain playback. Overview, leaving that instance, or hiding
+  the browser tab pauses it. Returning from history restores its position
+  paused. An autostart request may be blocked; use the visible Play control.
+- Browser/system reduced-motion preference makes camera transitions instant.
+
+The scientific fixture is synthetic teaching material, not a validated
+scattering calculation or a claim about EBSD indexing. It demonstrates three
+overlays, equations and translucent bands, a nearby result, detail views,
+supplementary detours and both existing packaged-video forms.
+
+## Prepare another talk
+
+Compile and pack as usual:
+
+```bash
+poetry run beamerpkg pack talk.pdf --root .
+poetry run beamerpkg spatial talk.beamerpkg
+```
+
+Without a sidecar, every physical PDF page becomes a separate frame in a grid.
+Overlay grouping is explicit; visually similar pages are never guessed.
+
+For an authored layout, prepare `talk.spatial.json` beside the archive. The
+fixture builder writes a valid, hash-bound example at
+`build/spatial-fixtures/science.spatial.json`. The schema and illustrative
+object/frame/viewpoint/path structure are described in
+[SPATIAL_PLAN.md](../SPATIAL_PLAN.md). Use descriptive IDs for your targets and
+paths. `source.pdf_sha256` must be the manifest's presentation hash and
+`source.pdf_path` its exact presentation path. Page indices are zero-based;
+groups must be consecutive, nonoverlapping, and geometrically compatible.
+This first MVP reserves `media_overrides` as an empty list.
+
+Layouts are read-only at runtime. There is no graphical editor or Save button.
+An invalid/stale sidecar is rejected without modification; rebuilding a PDF
+requires an explicit layout re-import/repair. The pdfpc route ignores that
+sidecar and remains usable. No presenter is selected or launched automatically
+because a sidecar happens to exist.
+
+To transport an authored spatial presentation, copy the archive **and** its
+matching adjacent sidecar. pdfpc still needs only the archive. Copying only the
+archive does not retain authored spatial placement/path metadata.
+
+## Build and check an installed distribution
+
+After the frontend build and fixture build above:
+
+```bash
+poetry build --output build/spatial-dist
+PLAYWRIGHT_BROWSERS_PATH=/tmp/beamerpkg-browsers poetry run python tools/check_spatial_distribution.py
+```
+
+The check needs a locally cached pypdf wheel and the development Playwright
+browser; see [frontend setup](../../frontend/spatial/README.md). It installs
+the experimental wheel in a fresh environment without index access, removes
+Node/npm/pdfpc from that environment's PATH, relocates the archive/layout, and
+drives the installed server using an external test browser. Non-loopback
+browser requests are blocked. This is not OS network isolation.
+
+Experimental builds stay under `build/spatial-dist`; do not overwrite release
+artifacts in `dist`. The prototype still uses package version 1.2.0 for local
+testing. These files are not a new public release.
+
+## Human walkthrough before relying on it for a talk
+
+1. Present the workflow, advance the scattering frame through all three
+   overlays in place, and reverse them.
+2. Open a detail and a supplementary result. Return to the exact planned
+   overlay and check whether that is understandable while speaking.
+3. Play each video form, zoom/pan, seek, leave, and return. Confirm sound stops
+   when expected on the actual browser/audio/display setup.
+4. Rehearse your own research PDF's equations, images, colors and required
+   magnification. Compare its appearance with your normal PDF viewer.
+5. Decide whether this route helps this talk. Continue using pdfpc for talks
+   that need its notes, timer, next preview or dual-screen presentation.
+
+Automated checks establish the implemented software behavior on the tested
+Linux/Chromium setup. They do not establish audience comprehension, broad
+browser/OS support, all scientific PDF fidelity, or live pdfpc parity.
+
+## Stop the experiment without rolling back main
+
+Keep owned work committed on the feature branch. Before a later switch to a
+main-only development/release build, preserve this branch's generated
+`src/beamerpkg/static/spatial` directory under the ignored `build/` directory.
+Generated files are not isolated by Git branches and could otherwise be picked
+up by a main-only Python package build. Keep the pinned frontend sources and
+retained evidence on the feature branch; rebuild its assets when resuming.
+Do not reset/revert main, delete evidence, or clean unrelated files. The existing
+pdfpc commands remain independent throughout.

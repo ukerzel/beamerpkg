@@ -1,6 +1,6 @@
 # beamerpkg Spatial v0.3 — Optional Presentation Route & Codex Handover
 
-**Status:** Broader design; the first read-only MVP is now authorized through S0–S4 in [SPATIAL_MVP.md](SPATIAL_MVP.md). Full editor/save scope remains deferred.
+**Status:** Broader design; the first read-only MVP is technically qualified through S0–S4 in [SPATIAL_MVP.md](SPATIAL_MVP.md). See [evaluation](spatial/PROTOTYPE_EVALUATION.md). Human walkthrough is pending; full editor/save scope remains deferred.
 
 **Date:** 2026-11-01
 
@@ -454,6 +454,11 @@ record the actual branch point; do not reset it to this historical observation.
 - Resume by returning to the retained feature branch and its recorded gate.
   Abandoning spatial development leaves `main` unchanged and requires no
   repository rollback.
+- Generated assets are not isolated by a branch. Before a later main-only
+  build, preserve `src/beamerpkg/static/spatial` under ignored `build/` so it
+  cannot enter that distribution accidentally. Rebuild from pinned frontend
+  sources when resuming the feature branch; do not delete evidence or unrelated
+  files as part of stopping.
 
 Use the installed guarded Git workflow. If it cannot create branches, the user
 creates the branch before the agent commits or starts implementation; do not
