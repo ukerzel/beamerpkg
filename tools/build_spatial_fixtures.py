@@ -7,7 +7,6 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import asdict
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
@@ -104,6 +103,18 @@ def main() -> None:
                         },
                     }
                 )
+                layout["viewpoints"].append(
+                    {
+                        "id": "video-detail",
+                        "target": {
+                            "kind": "object",
+                            "object_id": "o5",
+                            "region": [0.2, 0.2, 0.5, 0.5],
+                        },
+                    }
+                )
+                for index, obj in enumerate(layout["objects"]):
+                    obj["x"], obj["y"] = (index % 3) * 1120, (index // 3) * 800
                 layout["paths"][0]["steps"] = [
                     s
                     for s in layout["paths"][0]["steps"]

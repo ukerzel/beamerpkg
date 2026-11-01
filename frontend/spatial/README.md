@@ -12,6 +12,7 @@ npm ci
 node scripts/resources.mjs --dev
 PLAYWRIGHT_BROWSERS_PATH=/tmp/beamerpkg-browsers npx playwright install chromium
 npm run typecheck
+npm run build
 PLAYWRIGHT_BROWSERS_PATH=/tmp/beamerpkg-browsers npm test
 ```
 
@@ -21,8 +22,8 @@ probe PDFs/media, and test traces stay out of Git.
 
 `probe.html?adapter=dom` and `probe.html?adapter=flow` compare the same actual
 40-page repeated-content PDF and one playing media element. React Flow is
-developer-only. `npm run build` is the production build command once the S3
-viewer entry exists; the probe and generated fixture content are excluded
+developer-only. `npm run build` builds the production viewer before viewer
+tests; the probe and generated fixture content are excluded
 from the production build. `scripts/resources.mjs` adds local PDF.js resources
 and runtime third-party license notices to the Python package static directory.
 

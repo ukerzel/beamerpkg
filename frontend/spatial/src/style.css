@@ -1,0 +1,143 @@
+:root {
+    font-family: system-ui, sans-serif;
+    color: #ecf0f4;
+    background: #17232d;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+}
+button,
+select {
+    font: inherit;
+    border: 1px solid #718495;
+    border-radius: 5px;
+    background: #263a4a;
+    color: inherit;
+    padding: 0.4rem 0.65rem;
+    cursor: pointer;
+}
+button:hover,
+button:focus-visible {
+    background: #3c576e;
+}
+button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+}
+header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    flex-wrap: wrap;
+    background: #111b24;
+    z-index: 3;
+}
+header strong {
+    margin-right: 0.5rem;
+}
+header [data-testid='position'] {
+    font-size: 0.85rem;
+    margin-right: auto;
+}
+.workspace {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+.stage {
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    touch-action: none;
+}
+.world {
+    position: absolute;
+    transform-origin: 0 0;
+}
+.surface,
+.media-surface {
+    position: absolute;
+}
+.surface {
+    background: white;
+    box-shadow: 0 3px 24px #0005;
+    overflow: hidden;
+}
+.thumbnail {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.loading {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    color: #183448;
+    background: #fff9;
+    font-size: 20px;
+}
+.detail {
+    position: absolute;
+    pointer-events: none;
+}
+.media-surface {
+    pointer-events: none;
+}
+.movie {
+    position: absolute;
+    pointer-events: auto;
+    overflow: hidden;
+}
+.movie video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.movie-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #111c;
+    padding: 6px;
+    font-size: 13px;
+}
+.movie-controls button {
+    font-size: 14px;
+}
+aside {
+    width: 220px;
+    overflow-y: auto;
+    background: #111b24;
+    padding: 0.75rem;
+}
+aside button {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    overflow-wrap: anywhere;
+}
+.help,
+.alert {
+    padding: 0.7rem;
+    background: #263c4c;
+}
+.alert {
+    background: #692b2b;
+}
+main {
+    padding: 2rem;
+}

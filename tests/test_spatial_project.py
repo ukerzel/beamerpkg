@@ -73,3 +73,26 @@ def test_project_default_and_stale_sidecar(tmp_path: Path) -> None:
     with pytest.raises(PackageError, match="hash"):
         with load_project(original):
             pass
+
+
+def test_malformed_pdf_has_controlled_spatial_error(tmp_path: Path) -> None:
+    pdf = tmp_path / "talk.pdf"
+    pdf.write_bytes(b"%PDF-1.7\nnot a complete PDF")
+    assets = tmp_path / "empty.txt"
+    assets.write_text("")
+    package = pack_package(pdf, asset_list=assets)
+    with pytest.raises(PackageError, match="spatial project failed"):
+        with load_project(package):
+            pass
+
+
+def test_page_geometry_uses_visible_crop_media_intersection(tmp_path: Path) -> None:
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=320, height=180)
+    page.cropbox.lower_left = (-10, -10)
+    page.cropbox.upper_right = (400, 200)
+    writer.write(pdf)
+    package = pack_package(pdf)
+    with load_project(package) as project:
+        assert project.data["pages"][0]["box"] == [0, 0, 320, 180]

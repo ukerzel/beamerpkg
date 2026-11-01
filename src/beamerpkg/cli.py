@@ -43,7 +43,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     inspect = subparsers.add_parser("inspect", help="validate and describe a package")
     inspect.add_argument("package", type=Path)
-    inspect.add_argument("--json", action="store_true", help="emit the manifest as JSON")
+    inspect.add_argument(
+        "--json", action="store_true", help="emit the manifest as JSON"
+    )
 
     present = subparsers.add_parser("present", help="extract and launch with pdfpc")
     present.add_argument("package", type=Path)
@@ -51,6 +53,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--presenter",
         default="pdfpc",
         help="presenter executable (default: pdfpc)",
+    )
+
+    spatial = subparsers.add_parser(
+        "spatial", help="open the optional spatial PDF viewer"
+    )
+    spatial.add_argument("package", type=Path)
+    spatial.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="print local URL without opening a browser",
     )
 
     subparsers.add_parser(
@@ -159,6 +171,10 @@ def main(argv: list[str] | None = None) -> int:
             return _cmd_present(args)
         if args.command == "texdir":
             return _cmd_texdir(args)
+        if args.command == "spatial":
+            from .spatial_server import run_spatial
+
+            return run_spatial(args.package, open_browser=not args.no_browser)
     except PackageError as exc:
         print(f"beamerpkg: {exc}", file=sys.stderr)
         return 2

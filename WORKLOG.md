@@ -55,3 +55,20 @@
   has a bounded 45-second wait because startup is diagnostic, not a speed gate.
   Both adapters then passed, including same-surface overlay swaps. Earlier
   successful measurements remain immutable and are not a startup guarantee.
+
+## 2026-11-01 — S3 usable read-only viewer
+
+- S2 committed/pushed as `1b41ff0`. Added lazy opt-in CLI, bounded read-only
+  loopback server, runtime browser model validation, guided/history controller,
+  cancelable semantic camera, clipped rendering queue, and independent media.
+- Per-talk route isolation has fresh-process tests; static HTTP has no source
+  tree exposure or write API. HEAD/range and host/origin controls pass.
+- A real sidebar-resize/focus interruption failed the stronger video-detail
+  test; retained the trace and corrected pending-target handling. An earlier
+  stale-bundle test run after a failed typecheck is recorded separately.
+- Added native media-event status updates and paused-frame restoration. One
+  extra developer dependency, pinned Prettier, formats frontend code for review;
+  it is not shipped as runtime JavaScript. Runtime Python dependencies unchanged.
+- 57 Python tests and 18 frontend tests passed; Ruff/mypy (seven source files),
+  Poetry lock check, frontend typecheck/build passed. Retained sharp screenshot
+  and buffer dimensions; installed-distribution and human checks remain S4.

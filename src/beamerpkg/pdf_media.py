@@ -158,6 +158,8 @@ def discover_pdf_media_placements(
                     if not isinstance(movie, dict):
                         raise PdfMediaError("invalid movie dictionary")
                     raw = _file_spec_text(movie.get("/F"))
+                    if action is not None and not isinstance(action, dict):
+                        raise PdfMediaError("unsupported movie activation options")
                     if isinstance(action, dict):
                         if set(action) - {"/Mode", "/ShowControls"}:
                             raise PdfMediaError("unsupported movie playback options")
@@ -201,11 +203,11 @@ def discover_pdf_media_placements(
                 x0, y0, x1, y1 = (float(v) for v in rect)
                 if not all(math.isfinite(v) for v in (x0, y0, x1, y1)):
                     raise PdfMediaError("nonfinite media rectangle")
-                box = page.cropbox
-                if min(max(x0, x1), float(box.right)) <= max(
-                    min(x0, x1), float(box.left)
+                box, media_box = page.cropbox, page.mediabox
+                if min(max(x0, x1), float(box.right), float(media_box.right)) <= max(
+                    min(x0, x1), float(box.left), float(media_box.left)
                 ) or min(max(y0, y1), float(box.top)) <= max(
-                    min(y0, y1), float(box.bottom)
+                    min(y0, y1), float(box.bottom), float(media_box.bottom)
                 ):
                     raise PdfMediaError("empty visible media rectangle")
                 placements.append(

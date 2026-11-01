@@ -33,3 +33,4 @@ frontend/spatial/public/pdfjs/
 frontend/spatial/public/THIRD_PARTY_NOTICES.txt
 frontend/spatial/test-results/
 frontend/spatial/playwright-report/
+src/beamerpkg/static/spatial/

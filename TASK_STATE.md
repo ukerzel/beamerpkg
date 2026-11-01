@@ -82,8 +82,10 @@ On `feat/spatial-prototype`, execute the user-authorized first spatial MVP in
 published as `2fa9f70`. S1 admission/model/media implementation passes 22
 focused tests and 41 total tests, Ruff and mypy (six source files). Next:
 S1 published as `20bd4de`. S2 browser feasibility passes with both adapters;
-DOM selected in ADR-001. Next: commit/push S2, then S3 production read-only
-server/CLI and viewer. Evidence: `docs/spatial/GATE0_REPORT.md`. The branch starts at
+DOM selected in ADR-001. S2 published as `1b41ff0`; S3 read-only server/CLI and
+viewer passes 57 Python and 18 frontend tests, Ruff/mypy, Poetry lock and
+production build. Next: commit/push S3, then S4 installed-wheel/offline proof.
+Evidence: `docs/spatial/S3_REPORT.md`. The branch starts at
 `2e86c6f3be328f6c55d42ac0d792084d1372e95d`. `main` remains unchanged.
 
 The user configured `origin/feat/spatial-prototype` as upstream. Keep unrelated

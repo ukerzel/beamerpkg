@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 
 from .package import PackageError, _safe_relative_path, extract_package
 from .pdf_media import PdfMediaError, discover_pdf_media_placements
@@ -117,7 +118,13 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
                 raise PackageError("spatial PDF page limit exceeded")
             pages: list[dict[str, Any]] = []
             for page in reader.pages:
-                box = [float(v) for v in page.cropbox]
+                crop, media = page.cropbox, page.mediabox
+                box = [
+                    max(float(crop.left), float(media.left)),
+                    max(float(crop.bottom), float(media.bottom)),
+                    min(float(crop.right), float(media.right)),
+                    min(float(crop.top), float(media.top)),
+                ]
                 unit = float(page.get("/UserUnit", 1))
                 rotation = page.rotation % 360
                 width, height = (box[2] - box[0]) * unit, (box[3] - box[1]) * unit
@@ -140,6 +147,8 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
             placements = [
                 asdict(v) for v in discover_pdf_media_placements(pdf, set(assets))
             ]
+            if len(placements) > 2000:
+                raise PackageError("spatial media placement limit exceeded")
             sidecar = package.with_suffix(".spatial.json")
             layout = default_layout(source, pages)
             if sidecar.exists():
@@ -162,5 +171,5 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
             )
     except PackageError:
         raise
-    except (OSError, ValueError, PdfMediaError) as exc:
+    except (OSError, ValueError, PdfMediaError, PyPdfError) as exc:
         raise PackageError(f"spatial project failed: {exc}") from exc

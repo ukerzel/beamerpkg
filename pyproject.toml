@@ -18,6 +18,7 @@ beamerpkg = "beamerpkg.cli:main"
 
 [tool.poetry]
 packages = [{ include = "beamerpkg", from = "src" }]
+include = [{ path = "src/beamerpkg/static/spatial", format = ["sdist", "wheel"] }]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
