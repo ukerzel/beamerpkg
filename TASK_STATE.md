@@ -77,5 +77,12 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
-Desktop/file association and release/CI polish are the next bounded items. See
-`docs/NEXT_STEPS.md`.
+On `feat/spatial-prototype`, execute the user-authorized first spatial MVP in
+`docs/SPATIAL_MVP.md`; Active Batch is in `issues.md`. S0 plan/cold read is
+prepared, pending validation and commit/push before S1. The branch starts at
+`2e86c6f3be328f6c55d42ac0d792084d1372e95d`. `main` remains unchanged.
+
+Publication initially needs a configured same-name upstream. Keep unrelated
+untracked `examples/wrapperless.pdf` out of scoped commits. No release/merge or
+full editor is authorized. Existing-route desktop/release polish remains
+deferred in `docs/NEXT_STEPS.md`.

@@ -108,3 +108,16 @@ media-free talks could not use the container at all.
 Minimal change: when neither PDF discovery, `--assets`, nor the legacy sidecar
 yields media, `pack` produces a package with `"assets": []`. The schema is
 unchanged; `inspect` and `present` already accepted empty asset lists.
+
+## Optional spatial presentation experiment (2026-11-01)
+
+Requirement: explore a scientific talk through spatial frame groups, detail
+views, and reversible detours while preserving its PDF/media content. This is
+an additional presentation route; pdfpc remains independently supported.
+
+On `feat/spatial-prototype`, the user authorized the bounded read-only first
+MVP in [SPATIAL_MVP.md](SPATIAL_MVP.md): local PDF.js canvas, standard browser
+video overlays, safe read-only loopback serving, and optional validated layout
+JSON. The original container claim and history above remain unchanged. Each
+talk may use pdfpc, spatial, or both; no migration or dual authoring is required.
+No full editor, write API, schema change, release, or merge is included.

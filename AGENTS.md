@@ -39,3 +39,19 @@ requires it.
 
 Before extending scope, update `docs/MVP.md` with the concrete failure or
 requirement that justifies the extension.
+
+## Scoped spatial first MVP
+
+On `feat/spatial-prototype`, the user authorized execution through S0–S4 in
+`docs/SPATIAL_MVP.md` on 2026-11-01. `issues.md` Active Batch records progress.
+The concrete requirement is appended to `docs/MVP.md`; preserve its history.
+For this scope only, permit PDF.js browser rendering of unchanged PDF content,
+an opt-in `spatial` command, per-annotation placement inspection, a bounded
+read-only loopback server, and pinned local frontend dependencies/resources.
+These permissions do not change the existing pdfpc route or its acceptance.
+
+Keep existing `pack`, `inspect`, and `present` independent of spatial metadata,
+browser tooling, and spatial initialization. Spatial needs no pdfpc. No full
+editor, writable API, custom PDF/video renderer, transcoder, archive schema
+change, release, or merge to main. Run the ladder through passing rungs under
+the user's current authorization; stop at its material failure boundaries.
