@@ -6,11 +6,14 @@ SPATIAL-001: first optional spatial presentation route, on
 `feat/spatial-prototype`. User authorized plan/cold-read/commit/push followed by
 execution on 2026-11-01. Contract: [docs/SPATIAL_MVP.md](docs/SPATIAL_MVP.md).
 
-Current rung: **S2 — browser feasibility**, after S1 commit/push.
+Current rung: **S3 — usable viewer**, after S2 commit/push.
 
 Completed: S0 plan/cold read published in `2fa9f70`; S1 has 22 focused tests
 and 41 total passing tests, Ruff/mypy passing. S1 report:
 `docs/spatial/S1_REPORT.md`.
+S1 published as `20bd4de`. S2 comparison passed both adapters with actual
+playback and known rotated/cropped geometry; DOM selected by ADR-001.
+Gate 0 evidence is in `docs/spatial/GATE0_REPORT.md`.
 
 Proceed S0 -> S1 -> S2 -> S3 -> S4 when each exit passes. Retain failed
 evidence and stop at the contract's material boundaries. No full editor,

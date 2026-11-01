@@ -1,0 +1,138 @@
+{
+  "demo": {
+    "pdf_sha256": "ef0b763807c7db9c040e2e5114589870d3296ca1f3c2957c0f6583d1c89e3b3c",
+    "pages": 26,
+    "placements": [
+      {
+        "page_index": 17,
+        "annotation_index": 0,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          193.231,
+          46.466,
+          424.201,
+          176.453
+        ],
+        "kind": "movie",
+        "autostart": null,
+        "loop": true,
+        "controls": true,
+        "url": "/_probe/asset-0.mp4"
+      },
+      {
+        "page_index": 18,
+        "annotation_index": 1,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          94.247,
+          46.792,
+          359.296,
+          196.82
+        ],
+        "kind": "pdfpc_launch",
+        "autostart": true,
+        "loop": true,
+        "controls": null,
+        "url": "/_probe/asset-0.mp4"
+      }
+    ]
+  },
+  "wrapperless": {
+    "pdf_sha256": "bf12a46ca50d2831fcff5343ee14c66b0bc647deb7df553d0029e802dd9ab44f",
+    "pages": 1,
+    "placements": [
+      {
+        "page_index": 0,
+        "annotation_index": 0,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          72.0,
+          35.867,
+          381.543,
+          210.079
+        ],
+        "kind": "movie",
+        "autostart": null,
+        "loop": true,
+        "controls": true,
+        "url": "/_probe/asset-0.mp4"
+      }
+    ]
+  },
+  "science": {
+    "pdf_sha256": "42f0061b244d3a18179edf03abfb729fcd8ff1447b69a0c6887608c03f5a9a3c",
+    "pages": 8,
+    "placements": [
+      {
+        "page_index": 5,
+        "annotation_index": 0,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          97.796,
+          53.296,
+          355.747,
+          198.46
+        ],
+        "kind": "movie",
+        "autostart": null,
+        "loop": true,
+        "controls": true,
+        "url": "/_probe/asset-0.mp4"
+      },
+      {
+        "page_index": 6,
+        "annotation_index": 0,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          96.8,
+          52.299,
+          356.743,
+          199.456
+        ],
+        "kind": "pdfpc_launch",
+        "autostart": true,
+        "loop": true,
+        "controls": null,
+        "url": "/_probe/asset-0.mp4"
+      }
+    ]
+  },
+  "stress": {
+    "pdf_sha256": "2b586099e7abf8f21f84306b231e3a8228f61819b23c58cf6624030e96e0aa8f",
+    "pages": 40,
+    "placements": [
+      {
+        "page_index": 17,
+        "annotation_index": 0,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          193.231,
+          46.466,
+          424.201,
+          176.453
+        ],
+        "kind": "movie",
+        "autostart": null,
+        "loop": true,
+        "controls": true,
+        "url": "/_probe/asset-0.mp4"
+      },
+      {
+        "page_index": 18,
+        "annotation_index": 1,
+        "asset_path": "media/gemini_generated_video_b2693757.mp4",
+        "rect_pdf": [
+          94.247,
+          46.792,
+          359.296,
+          196.82
+        ],
+        "kind": "pdfpc_launch",
+        "autostart": true,
+        "loop": true,
+        "controls": null,
+        "url": "/_probe/asset-0.mp4"
+      }
+    ]
+  }
+}

@@ -25,3 +25,11 @@ build/
 # Generated presentation packages
 *.beamerpkg
 examples/demo.pdf
+
+# Spatial developer tools and generated fixtures/evidence
+node_modules/
+frontend/spatial/public/_probe/
+frontend/spatial/public/pdfjs/
+frontend/spatial/public/THIRD_PARTY_NOTICES.txt
+frontend/spatial/test-results/
+frontend/spatial/playwright-report/

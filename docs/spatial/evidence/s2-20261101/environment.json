@@ -1,0 +1,7 @@
+{
+  "os": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "cpu": "",
+  "logical_cpus": 16,
+  "source_commit": "20bd4de",
+  "evidence_scope": "S2 working tree; fixture producers and pinned lockfile included in S2 commit; two successful browser runs, second metrics retained; fresh contexts, shared OS/Vite caches uncontrolled"
+}

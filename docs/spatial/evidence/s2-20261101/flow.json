@@ -1,0 +1,30 @@
+{
+  "adapter": "flow",
+  "nodes": 40,
+  "mounts": 40,
+  "loadMs": 3340.199999988079,
+  "thumbnailPixelBytes": 9216002.257779311,
+  "diagnostic": {
+    "mainThreadTaskSeconds": 2.401685,
+    "jsHeapUsedBytes": 60545508,
+    "tenCommandRoundtripMs": 101.68496699999923,
+    "cacheState": "fresh browser context; shared OS and Vite caches uncontrolled"
+  },
+  "geometry": {
+    "rotation": 90,
+    "rect": [
+      0.2,
+      0.2,
+      0.5333333333333333,
+      0.5
+    ],
+    "cornerError": 0
+  },
+  "external": [],
+  "browser": "156.0.8078.4",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "devicePixelRatio": 1
+}

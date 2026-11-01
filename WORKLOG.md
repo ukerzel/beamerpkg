@@ -31,3 +31,27 @@
 - Existing demo archive yields both real placements with distinct page/annotation
   identity and encoded repeat/controls/autostart flags. Browser behavior and
   rebuilt-fixture evidence remain S2 work, not established by these tests.
+
+## 2026-11-01 — S2 browser feasibility
+
+- S1 committed/pushed as `20bd4de`. Pinned frontend tools and Chromium installed
+  with writable /tmp caches; normal npm cache was read-only, then corrected.
+- Fresh isolated TeX builds preserve user's example outputs. Science fixture
+  has eight pages and explicit three-overlay grouping; stress repeats real
+  pages to 40 and is labelled repeated-content stress.
+- Both adapters passed real video continuity, local-only resource loading and
+  independently specified cropped/rotated geometry on two browser runs.
+- Inspected PDF.js science screenshot against Poppler; readable formulas,
+  translucent bands and layout retained. Fine antialiasing differences noted.
+- Selected DOM by ADR-001 for the graph-free presentation consumer. Measured
+  timings/heap/TaskDuration are diagnostics, not a speed or memory-superiority
+  claim. Small immutable evidence retained in `docs/spatial/evidence/s2-20261101`.
+- Installed PDF.js 6 uses loadingTask teardown; initial TypeScript errors exposed
+  that API mismatch and missing Node type declarations, then were corrected.
+- S3 must still establish full navigation, bounded rendering/media policy,
+  safe serving and route independence. No product acceptance is asserted.
+- An added overlay-swap probe hit Playwright's implicit five-second readiness
+  assertion for DOM. Retained trace/error context before retry; readiness now
+  has a bounded 45-second wait because startup is diagnostic, not a speed gate.
+  Both adapters then passed, including same-surface overlay swaps. Earlier
+  successful measurements remain immutable and are not a startup guarantee.
