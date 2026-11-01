@@ -72,3 +72,22 @@
 - 57 Python tests and 18 frontend tests passed; Ruff/mypy (seven source files),
   Poetry lock check, frontend typecheck/build passed. Retained sharp screenshot
   and buffer dimensions; installed-distribution and human checks remain S4.
+
+## 2026-11-01 — S4 runtime-asset boundary correction
+
+- S3 published as `5450649`. First installed-wheel proof passed with Node/npm/
+  pdfpc absent from runtime PATH, no non-local browser requests, real MP4 seek
+  and 206 responses, paused restore and cleanup. Final proof will be repeated
+  after the boundary correction below.
+- Review found the HTTP allowlist included every declared runtime asset, even
+  those not referenced by a media placement. A new HTTP regression failed
+  (unreferenced HTML returned 200). Serve referenced placement assets only and
+  force non-media payloads to attachment/octet-stream with nosniff, so archive
+  files cannot become same-origin executable HTML/JS through that route.
+- Experimental builds now use `build/spatial-dist`. The first build reused
+  `dist/` release filenames and an initial helper glob selected an old 1.0.1
+  wheel. Restored the published 1.2.0 wheel/sdist from PyPI and verified official
+  hashes; retained restoration receipt. No artifact was published or released.
+- Boundary correction validation: regression first returned 200 instead of
+  expected 404; now 59 Python tests pass, including non-executable handling of
+  a referenced HTML payload. Ruff and mypy (seven source files) pass.

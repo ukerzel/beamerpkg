@@ -19,10 +19,12 @@ def server(tmp_path: Path):
     pdf.write_bytes(b"%PDF-1.7\n")
     video = tmp_path / "clip.mp4"
     video.write_bytes(b"0123456789")
+    unreferenced = tmp_path / "unreferenced.html"
+    unreferenced.write_text("<script>throw new Error('not runtime media')</script>")
     (tmp_path / "secret.tex").write_text("not public")
     project = SpatialProject(
         pdf,
-        {"media/clip.mp4": video},
+        {"media/clip.mp4": video, "unreferenced.html": unreferenced},
         {
             "source": {},
             "pages": [],
@@ -96,8 +98,40 @@ def test_host_origin_denial_and_no_os_paths(server):
     assert b"/runtime/asset-0" in body and b"/tmp/" not in body
 
 
+def test_unreferenced_manifest_asset_is_not_browser_surface(server):
+    assert request(server, "/runtime/asset-1")[0] == 404
+
+
 def test_allowlisted_static_symlink_replacement_denied(server, tmp_path: Path):
     index = tmp_path / "static/index.html"
     index.unlink()
     index.symlink_to(tmp_path / "secret.tex")
     assert request(server, "/")[0] == 404
+
+
+def test_referenced_nonmedia_payload_cannot_be_served_as_executable_html(
+    tmp_path: Path,
+):
+    static = tmp_path / "static"
+    static.mkdir()
+    (static / "index.html").write_text("viewer")
+    pdf = tmp_path / "talk.pdf"
+    pdf.write_bytes(b"%PDF-1.7")
+    payload = tmp_path / "clip.html"
+    payload.write_text("<script>alert('not video')</script>")
+    project = SpatialProject(
+        pdf, {"clip.html": payload}, {"placements": [{"asset_path": "clip.html"}]}
+    )
+    instance = make_server(project, static)
+    worker = threading.Thread(target=instance.serve_forever, daemon=True)
+    worker.start()
+    try:
+        status, headers, _ = request(instance)
+        assert status == 200
+        assert headers["Content-Type"] == "application/octet-stream"
+        assert headers["Content-Disposition"] == "attachment"
+        assert headers["X-Content-Type-Options"] == "nosniff"
+    finally:
+        instance.shutdown()
+        instance.server_close()
+        worker.join(timeout=3)

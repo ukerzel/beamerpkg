@@ -84,7 +84,10 @@ focused tests and 41 total tests, Ruff and mypy (six source files). Next:
 S1 published as `20bd4de`. S2 browser feasibility passes with both adapters;
 DOM selected in ADR-001. S2 published as `1b41ff0`; S3 read-only server/CLI and
 viewer passes 57 Python and 18 frontend tests, Ruff/mypy, Poetry lock and
-production build. Next: commit/push S3, then S4 installed-wheel/offline proof.
+production build. S3 published as `5450649`. S4 is in progress; initial
+installed-wheel proof passed. A follow-up HTTP correction restricts runtime
+serving to referenced media and non-executable MIME handling; requalify the
+final built distribution after that commit/push.
 Evidence: `docs/spatial/S3_REPORT.md`. The branch starts at
 `2e86c6f3be328f6c55d42ac0d792084d1372e95d`. `main` remains unchanged.
 

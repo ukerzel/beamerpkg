@@ -58,7 +58,11 @@ def make_server(
     allowlist["/"] = (static / "index.html", static)
     allowlist["/runtime/document.pdf"] = (project.pdf, project.pdf.parent)
     urls: dict[str, str] = {}
-    for index, (asset, path) in enumerate(project.assets.items()):
+    referenced = {p["asset_path"] for p in project.data["placements"]}
+    runtime_media = (
+        (asset, path) for asset, path in project.assets.items() if asset in referenced
+    )
+    for index, (asset, path) in enumerate(runtime_media):
         url = f"/runtime/asset-{index}"
         allowlist[url] = (path, path.parent)
         urls[asset] = url
@@ -147,6 +151,11 @@ def make_server(
                     content_type = (
                         mimetypes.guess_type(str(file))[0] or "application/octet-stream"
                     )
+                    if path.startswith(
+                        "/runtime/asset-"
+                    ) and not content_type.startswith(("video/", "audio/")):
+                        content_type = "application/octet-stream"
+                        extra["Content-Disposition"] = "attachment"
                     self._headers(status, remaining, content_type, extra)
                     if head:
                         return
