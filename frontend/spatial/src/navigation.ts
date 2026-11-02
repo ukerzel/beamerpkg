@@ -21,7 +21,7 @@ export type Navigation = Omit<Snapshot, 'camera' | 'media'> & {
     notice: string;
 };
 export type Action = {
-    type: 'next' | 'previous' | 'escape' | 'overview' | 'pan' | 'focus' | 'path';
+    type: 'next' | 'previous' | 'escape' | 'overview' | 'pan' | 'focus' | 'path' | 'step';
     id?: string;
     camera: Camera;
     media: Bookmark;
@@ -99,6 +99,13 @@ export function navigate(m: Layout, state: Navigation, action: Action): Navigati
     });
     if (action.type === 'path')
         return enter(m, { ...state, pathId: action.id!, history: [], anchor: null }, 0, 1);
+    if (action.type === 'step') {
+        // Jump to a guided step chosen in the overview; detours are discarded.
+        const index = Number(action.id);
+        const path = m.paths.find((p) => p.id === state.pathId)!;
+        if (!Number.isInteger(index) || index < 0 || index >= path.steps.length) return state;
+        return enter(m, { ...state, history: [], anchor: null }, index, 1);
+    }
     if (
         action.type === 'escape' ||
         (state.mode === 'overview' && (action.type === 'next' || action.type === 'previous'))

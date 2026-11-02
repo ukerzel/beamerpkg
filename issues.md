@@ -34,6 +34,10 @@ remain independent; each talk may use one or both.
 Ownership: parent agent implements the scoped Python modules, frontend,
 fixtures/tests, and documentation. No delegated work is authorized or required.
 
+Follow-up 2026-11-02 (user request, not yet committed): "wow" presentation
+pass on the viewer (see `docs/MVP.md`, presentation polish). 59 Python and 22
+frontend tests pass. Human rehearsal still pending.
+
 ## Deferred
 
 - Full graphical editor, writable persistence API, archive-contained layouts.

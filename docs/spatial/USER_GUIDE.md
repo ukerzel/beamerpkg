@@ -40,10 +40,17 @@ removes extracted files. Only the local loopback endpoint is served.
 
 ## Present and explore
 
-- Right / Space advances an overlay, then the next path step. Left reverses
-  overlays and steps. A fixed-overlay detail step is one path step.
-- Overview or O shows the canvas silently. Views selects a whole-frame/detail
-  target for a temporary detour. Double-click a frame to focus it.
+- Right / Space / PgDn advances an overlay, then the next path step. Left /
+  PgUp reverses overlays and steps (presentation clickers usually send
+  PgUp/PgDn). A fixed-overlay detail step is one path step.
+- Overview or O shows the whole canvas with the guided route and numbered
+  stops; clicking a number jumps to that step (discarding detours), clicking a
+  frame flies into it as a detour. Views (V) opens previews of every
+  whole-frame/detail target for a temporary detour. Double-click a frame to
+  focus it. M toggles the minimap, F fullscreen, ? the shortcut sheet.
+- Camera moves zoom out, travel and zoom back in (smooth zoom/pan path). While
+  presenting, the control dock, status and cursor hide after a few idle
+  seconds; moving the mouse brings them back. Non-active frames are dimmed.
 - Drag to pan; wheel to zoom. Exploring keeps the guided resume point.
 - Escape / Return unwinds one detour. In exploration, a presentation arrow
   returns to the guided resume point without advancing; press again to advance.

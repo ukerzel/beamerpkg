@@ -87,3 +87,19 @@ test('detour bound preserves the guided anchor', () => {
     expect(state.mode).toBe('guided');
     expect(state.step).toBe(0);
 });
+test('overview step jump enters guided step and drops detours; invalid index is ignored', () => {
+    let state = navigate(layout, initial(layout), { ...context, type: 'focus', id: 'other' });
+    state = navigate(layout, state, { ...context, type: 'overview' });
+    expect(state.history.length).toBe(2);
+    const request = state.cameraRequest;
+    state = navigate(layout, state, { ...context, type: 'step', id: '1' });
+    expect(state.mode).toBe('guided');
+    expect(state.step).toBe(1);
+    expect(state.viewId).toBe('detail');
+    expect(state.overlays.a).toBe(2);
+    expect(state.history).toEqual([]);
+    expect(state.anchor).toBeNull();
+    expect(state.cameraRequest).toBeGreaterThan(request);
+    for (const id of ['3', '-1', '1.5', 'x'])
+        expect(navigate(layout, state, { ...context, type: 'step', id })).toBe(state);
+});

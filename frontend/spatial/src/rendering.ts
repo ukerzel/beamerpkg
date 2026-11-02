@@ -10,10 +10,15 @@ type Job = {
     pixels: number;
     done?: () => void;
 };
-/** One render at a time, 60k-pixel thumbnails and two <=4M-pixel detail buffers.
- * With <=400 objects this bounds canvas RGBA below 128 MiB, including the
- * offscreen replacement buffer. This does not bound browser/worker total RAM.
+/** One render at a time. All thumbnails together stay within 18.5M pixels
+ * (`thumbnailBudget`: at most 1M each, sharper flights for small decks) and
+ * three <=4M-pixel buffers exist at most: detail, its offscreen replacement and
+ * the overlay crossfade ghost. At most 48 viewpoint previews add <=1M pixels. This bounds
+ * canvas RGBA below 128 MiB. It does not bound browser/worker total RAM.
  */
+export function thumbnailBudget(objects: number): number {
+    return Math.max(1, Math.min(1_000_000, Math.floor(18_500_000 / Math.max(1, objects))));
+}
 export class Renderer {
     private queue = new Map<string, Job>();
     private current: { job: Job; task: RenderTask | null; cancelled: boolean } | null = null;
@@ -21,6 +26,7 @@ export class Renderer {
     constructor(
         private pdf: PDFDocumentProxy,
         private error: (message: string) => void,
+        private thumbnailPixels = 60_000,
     ) {}
     request(
         key: string,
@@ -36,7 +42,7 @@ export class Renderer {
             canvas,
             scale,
             clip,
-            pixels: key === 'detail' ? 4_000_000 : 60_000,
+            pixels: key === 'detail' ? 4_000_000 : this.thumbnailPixels,
             done,
         };
         this.queue.set(key, job);

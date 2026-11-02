@@ -121,3 +121,15 @@ video overlays, safe read-only loopback serving, and optional validated layout
 JSON. The original container claim and history above remain unchanged. Each
 talk may use pdfpc, spatial, or both; no migration or dual authoring is required.
 No full editor, write API, schema change, release, or merge is included.
+
+### Presentation polish after first look (2026-11-02)
+
+Finding: the user reported that the spatial viewer works technically but feels
+uninspiring to present with. Bounded response, frontend only: smooth
+zoom-out/pan/zoom-in camera paths, auto-hiding presentation chrome, dimmed
+non-active frames, an overview route with numbered step jumps, a minimap,
+viewpoint previews cropped from existing thumbnails, a shortcut sheet,
+PgUp/PgDn clicker keys, fullscreen, and an overlay crossfade that holds the
+previous sharp render until the next is ready. PDF pages remain unchanged
+PDF.js renders; no Python, archive, sidecar schema, server, or pdfpc change.
+Canvas accounting stays below 128 MiB (thumbnail budget scaled by deck size).
