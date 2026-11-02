@@ -37,6 +37,8 @@ fixtures/tests, and documentation. No delegated work is authorized or required.
 Follow-up 2026-11-02 (user request, not yet committed): "wow" presentation
 pass on the viewer (see `docs/MVP.md`, presentation polish). 59 Python and 22
 frontend tests pass. Human rehearsal still pending.
+Follow-up 2026-11-02: the pdfpc demo talk gained a generated spatial layout
+(`tools/demo_spatial_layout.py`, tour + deck paths); see `docs/MVP.md`.
 
 ## Deferred
 

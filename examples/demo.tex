@@ -119,7 +119,7 @@
 \newcommand{\chiptag}[2][amber]{\tikz[baseline=(t.base)]\node[chip,fill=#1!18,text=#1!60!black](t){#2};}
 
 \title{One file. Every slide. Every video.}
-\subtitle{Portable multimedia Beamer talks, presented with pdfpc}
+\subtitle{Portable multimedia Beamer talks, for pdfpc or a spatial canvas}
 \author{beamerpkg demo}
 \date{}
 
@@ -140,8 +140,8 @@
   \chiptag[amber]{+ media/*.mp4}\enspace
   \chiptag[violet]{\textrightarrow{} talk.beamerpkg}
   \vfill
-  {\scriptsize\color{white!60}Press \textbf{\textrightarrow} to begin. Speaker notes and the
-    timer are on the presenter screen.\par}
+  {\scriptsize\color{white!60}Press \textbf{\textrightarrow} to begin. With pdfpc, speaker notes
+    and the timer are on the presenter screen.\par}
   \vskip6mm
   % No \pdfpcnote here: page 1 shows the note from examples/demo.pdfpc.
 \end{frame}
@@ -458,7 +458,7 @@
   \centering
   \begin{tikzpicture}
     \node[rounded corners=2mm,fill=navy,inner sep=0pt,minimum width=0.9\textwidth,
-          minimum height=38mm] (term) {};
+          minimum height=48mm] (term) {};
     \foreach \c [count=\i] in {danger,amber,sky}
       \fill[\c] ($(term.north west)+(1mm+\i*3.2mm,-3mm)$) circle (0.9mm);
     \node[anchor=north west,font=\ttfamily\footnotesize,text=white,align=left]
@@ -468,14 +468,16 @@
        \color{white!50}\# what is inside?\\
        \color{amber}\$\ \color{white}poetry run beamerpkg inspect examples/demo.beamerpkg\\[2.2mm]
        \color{white!50}\# present on two screens\\
-       \color{amber}\$\ \color{white}poetry run beamerpkg present examples/demo.beamerpkg};
+       \color{amber}\$\ \color{white}poetry run beamerpkg present examples/demo.beamerpkg\\[2.2mm]
+       \color{white!50}\# ...or fly through the same file on a spatial canvas\\
+       \color{amber}\$\ \color{white}poetry run beamerpkg spatial examples/demo.beamerpkg};
   \end{tikzpicture}
 
-  \vskip6mm
+  \vskip4mm
   \chiptag[sky]{keep writing Beamer}\quad
   \chiptag[amber]{ship one file}\quad
-  \chiptag[violet]{present with pdfpc}
-  \pdfpcnote{Three commands: build, inspect, present.\\Questions?}
+  \chiptag[violet]{present your way}
+  \pdfpcnote{Build, inspect, present - with pdfpc or spatially, from the same archive.\\Questions?}
 \end{frame}
 
 \end{document}

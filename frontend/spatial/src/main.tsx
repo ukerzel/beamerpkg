@@ -636,7 +636,11 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
         const start = performance.now() + hold;
         const tick = (now: number) => {
             const t = duration ? Math.max(0, Math.min(1, (now - start) / duration)) : 1;
-            setCamera(path.at(t));
+            const next = path.at(t),
+                current = cameraRef.current;
+            // An unchanged pose must not restart the detail-render debounce.
+            if (next.cx !== current.cx || next.cy !== current.cy || next.zoom !== current.zoom)
+                setCamera(next);
             if (t < 1) motion.current = requestAnimationFrame(tick);
             else animating.current = false;
         };

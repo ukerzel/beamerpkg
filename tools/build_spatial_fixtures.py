@@ -14,6 +14,8 @@ from pypdf import PdfReader, PdfWriter
 from beamerpkg.package import pack_package
 from beamerpkg.spatial_project import load_project
 
+from demo_spatial_layout import main as write_demo_layout
+
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
@@ -53,6 +55,11 @@ def main() -> None:
             root=authoring,
             output=build / f"{name}.beamerpkg",
         )
+    # A rebuilt PDF has a new hash; rebind the demo's authored layout at once.
+    write_demo_layout([str(build / "demo.beamerpkg")])
+    # The science layout is derived below from the default layout; a previous
+    # run's sidecar is bound to the old PDF hash and would be rejected.
+    (build / "science.spatial.json").unlink(missing_ok=True)
     writer = PdfWriter()
     reader = PdfReader(authoring / "demo.pdf")
     for index in range(40):

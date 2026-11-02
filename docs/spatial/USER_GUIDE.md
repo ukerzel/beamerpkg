@@ -14,6 +14,31 @@ Use either command, or both with one archive. Spatial mode needs a supported
 browser; pdfpc is not required for it. The existing route needs no browser,
 spatial layout, or frontend tooling.
 
+## Try the demo talk spatially
+
+The showcase is the same `examples/demo.beamerpkg` used for pdfpc. One archive
+serves both routes:
+
+```bash
+./examples/build_demo.sh                           # PDF, archive, and layout
+poetry run beamerpkg present examples/demo.beamerpkg   # pdfpc, two screens
+poetry run beamerpkg spatial examples/demo.beamerpkg   # spatial canvas
+```
+
+`build_demo.sh` runs `tools/demo_spatial_layout.py`, which writes
+`examples/demo.spatial.json` bound to that build's PDF hash. pdflatex output
+changes per build, so the layout is generated rather than committed. If you
+edit `demo.tex` so that its page count changes, update `FRAMES` in that tool.
+
+The canvas puts the title at the centre with the talk's four acts around it
+clockwise: the problem (left), Beamer stays Beamer (top), media (right) and
+shipping (bottom). The default `tour` path zooms into the Lagrangian, then
+into the Higgs potential, where the next steps drop the ball into the vacuum
+in place. It then zooms into the click-to-play video and ends on the whole
+canvas. The pdfpc-specific frames (page transitions, presenter screen) are
+small satellites off the tour. The `deck` path in the dock's path menu plays
+all eleven frames in their original order.
+
 ## Build and try the teaching fixture
 
 From this branch's repository root:

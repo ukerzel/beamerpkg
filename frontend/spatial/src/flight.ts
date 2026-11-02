@@ -37,7 +37,9 @@ export function flight(from: Camera, to: Camera, size: Size): Flight {
         };
     }
     const raw = (Math.abs(S) * 1000 * RHO) / Math.SQRT2;
-    const duration = Number.isFinite(raw) ? Math.max(380, Math.min(1500, raw * 0.85)) : 0;
+    // No travel (e.g. two steps on one view that differ only in overlay) is instant.
+    const duration =
+        Number.isFinite(raw) && raw >= 1 ? Math.max(380, Math.min(1500, raw * 0.85)) : 0;
     return {
         duration,
         at: (t) => {

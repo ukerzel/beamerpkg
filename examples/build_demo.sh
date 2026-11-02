@@ -30,6 +30,10 @@ poetry -C "$REPO_ROOT" run beamerpkg pack \
   --source "src/beamerpkg/tex/beamerpkg.sty" \
   --output "$SCRIPT_DIR/demo.beamerpkg"
 
+# Authored spatial layout for the same archive, bound to this build's PDF hash.
+poetry -C "$REPO_ROOT" run python "$REPO_ROOT/tools/demo_spatial_layout.py" \
+  "$SCRIPT_DIR/demo.beamerpkg"
+
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
 pdflatex -interaction=nonstopmode -halt-on-error wrapperless.tex >/dev/null
 poetry -C "$REPO_ROOT" run beamerpkg pack \
@@ -41,4 +45,4 @@ poetry -C "$REPO_ROOT" run beamerpkg pack \
   --source "examples/media/video-poster_big.png" \
   --output "$SCRIPT_DIR/wrapperless.beamerpkg"
 
-echo "Created examples/demo.beamerpkg and examples/wrapperless.beamerpkg"
+echo "Created examples/demo.beamerpkg (+ demo.spatial.json) and examples/wrapperless.beamerpkg"

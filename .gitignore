@@ -25,6 +25,8 @@ build/
 # Generated presentation packages
 *.beamerpkg
 examples/demo.pdf
+# Spatial layouts bound to a locally built PDF hash
+examples/*.spatial.json
 
 # Spatial developer tools and generated fixtures/evidence
 node_modules/
