@@ -77,6 +77,12 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
+2026-11-03: the spatial route was merged into `main` at the user's instruction,
+after the user's walkthrough. The pre-merge audit fixes are in `b995141`. Final
+check: 68 Python and 27 frontend tests, Ruff, mypy, TypeScript and the
+installed-wheel proof. Remaining deferred work is in `issues.md` (Deferred).
+The history below is kept as it was.
+
 The user-authorized first spatial MVP S0–S4 is technically complete on
 `feat/spatial-prototype`; stop after final S4 commit/push. Human walkthrough
 and the proceed/revise/stop product decision remain pending. No further editor,

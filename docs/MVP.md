@@ -155,3 +155,19 @@ cluster in a band below the talk, adds a world-rectangle viewpoint per part
 and a `backup` path. No schema change is involved: the clusters come from
 placement alone. The viewer only gains miniature previews of canvas-region
 viewpoints, drawn from the existing thumbnails.
+
+### Merge into main (2026-11-03)
+
+Decision: the user walked through the demo talk on the spatial route and asked
+for an audit and merge. A review of the whole branch reported ten findings.
+Seven were verified as real and fixed with regression tests (`b995141`):
+- runtime 404s under a symlinked temp dir;
+- a restored video pausing or rewinding after a later pan;
+- overview framing taking the current step's padding;
+- a missing MediaBox.top clamp;
+- tracebacks from malformed page values;
+- launch-target normalization differing from `pack`;
+- a thumbnail render-key collision.
+
+The pdfpc route is unchanged and independent. The spatial route stays optional
+and read-only, and is not yet in a PyPI release.

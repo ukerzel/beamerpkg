@@ -1,6 +1,9 @@
 # First spatial MVP: read-only presentation slice
 
 Date: 2026-11-01. Branch: `feat/spatial-prototype`.
+Status (2026-11-03): merged into `main` at the user's instruction after the
+user's walkthrough. The no-merge limits below describe the ladder as authorized
+at the time; they are kept as history.
 Baseline: `2e86c6f3be328f6c55d42ac0d792084d1372e95d` (package 1.2.0).
 
 This is the executable first slice of [the spatial design](SPATIAL_PLAN.md).

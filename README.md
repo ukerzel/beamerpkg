@@ -29,10 +29,10 @@ Version 1.2.0 makes media optional. A PDF without movie references packs as
 PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 `assets` list.
 
-### Optional spatial prototype (feature branch)
+### Optional spatial route
 
-`feat/spatial-prototype` adds a read-only spatial presentation route while
-retaining the existing pdfpc route:
+An optional, read-only spatial presentation route sits beside the existing
+pdfpc route:
 
 ```bash
 beamerpkg present talk.beamerpkg   # existing pdfpc presentation
@@ -45,9 +45,10 @@ the two existing packaged-video forms. A saved spatial arrangement uses an
 adjacent `talk.spatial.json`; the v1 archive remains unchanged. There is no
 graphical editor or write API in this first MVP.
 
-The prototype is on this branch, not a new PyPI release. From a checkout, build
-the pinned frontend before using `spatial`; built wheels include its offline
-assets and need no end-user Node/npm or pdfpc. See the
+It is not yet in a PyPI release. From a checkout, build the pinned frontend
+(`cd frontend/spatial && npm ci && npm run build`) before using `spatial`.
+Built wheels include its offline assets and need no end-user Node/npm or pdfpc.
+`examples/build_demo.sh` builds the demo talk for both routes. See the
 [try-it guide](docs/spatial/USER_GUIDE.md),
 [first-MVP contract](docs/SPATIAL_MVP.md), and
 [technical evaluation](docs/spatial/PROTOTYPE_EVALUATION.md).

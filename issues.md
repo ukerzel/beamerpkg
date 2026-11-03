@@ -6,9 +6,14 @@ SPATIAL-001: first optional spatial presentation route, on
 `feat/spatial-prototype`. User authorized plan/cold-read/commit/push followed by
 execution on 2026-11-01. Contract: [docs/SPATIAL_MVP.md](docs/SPATIAL_MVP.md).
 
-Current state: **S0–S4 technically complete; stop at human walkthrough**.
-No further implementation rung is active. Human presentation/product acceptance
-remains pending and is not implied by software qualification.
+Current state: **merged into `main` on 2026-11-03** at the user's instruction,
+after the user's own walkthrough of the demo talk on both routes. A pre-merge
+audit fixed seven verified findings (`b995141`). Final check: 68 Python and 27
+frontend tests pass, plus Ruff, mypy, TypeScript and the installed-wheel proof.
+No further implementation rung is active. Earlier history follows.
+
+S0–S4 were technically complete with a stop at human walkthrough; product
+acceptance was pending and not implied by software qualification.
 
 Completed: S0 plan/cold read published in `2fa9f70`; S1 has 22 focused tests
 and 41 total passing tests, Ruff/mypy passing. S1 report:
