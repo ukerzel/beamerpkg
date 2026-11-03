@@ -24,14 +24,19 @@ The container/path MVP was validated on **2026-09-30** with pdfpc under WSL/WSLg
 the packaged PDF rendered normally and the packaged H.264 video played in the
 TeX-defined rectangle. The full-resolution autoplay demo also works.
 
-Version 0.2 adds **wrapperless media discovery**: for standard Beamer
+Version 0.2 added **wrapperless media discovery**: for standard Beamer
 `multimedia/\movie` documents, `beamerpkg pack` reads the PDF annotation and
 collects the referenced local media automatically. A `.beamerpkg-assets`
 sidecar is no longer required for normal use.
 
-Version 1.2.0 makes media optional. A PDF without movie references packs as
+Version 1.2.0 made media optional. A PDF without movie references packs as
 PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 `assets` list.
+
+The spatial route was merged into `main` on 2026-11-03. The checkout also
+contains the subsequent packaging/media fixes and validation work. The next
+release is being prepared; [PyPI 1.2.0](https://pypi.org/project/beamerpkg/1.2.0/)
+contains the pdfpc route only.
 
 ### Two presentation routes
 
@@ -54,13 +59,19 @@ returning, and both packaged-video forms. A spatial arrangement lives beside the
 archive in `talk.spatial.json`; the archive format is the same for both routes.
 Spatial is read-only for now: there is no graphical editor or write API yet.
 
-The spatial route is not yet in a PyPI release. From a checkout, build the pinned frontend
-(`cd frontend/spatial && npm ci && npm run build`) before using `spatial`.
-Built wheels include its offline assets and need no end-user Node/npm or pdfpc.
-`examples/build_demo.sh` builds the demo talk for both routes. See the
-[try-it guide](docs/spatial/USER_GUIDE.md),
-[first-MVP contract](docs/SPATIAL_MVP.md), and
-[technical evaluation](docs/spatial/PROTOTYPE_EVALUATION.md).
+From a checkout, build the pinned frontend before using `spatial`, following
+the setup below. Built wheels include its offline assets and need no end-user
+Node/npm or pdfpc. `examples/build_demo.sh` builds the demo talk for both routes. See the
+[try-it guide](https://github.com/ukerzel/beamerpkg/blob/main/docs/spatial/USER_GUIDE.md),
+[first-MVP contract](https://github.com/ukerzel/beamerpkg/blob/main/docs/SPATIAL_MVP.md), and
+[technical evaluation](https://github.com/ukerzel/beamerpkg/blob/main/docs/spatial/PROTOTYPE_EVALUATION.md).
+
+The viewer includes grouped overlays, whole-frame and detail views, named
+paths, a whole-canvas overview with clickable steps, a minimap, viewpoint
+previews, fullscreen and keyboard/clicker controls. Temporary detours retain
+the guided position; nested returns restore overlays, camera and paused media.
+The demo includes separate backup clusters for questions. See the guide for
+the controls, supported media options and size limits.
 
 ## Package format
 
@@ -79,19 +90,63 @@ talk.beamerpkg
     └── references.bib
 ```
 
-The manifest contains SHA-256 hashes and byte sizes. Runtime media are stored at
-exactly the same relative paths used by Beamer. Optional editable sources live
-under `source/` and are recorded separately in the manifest.
+The manifest contains SHA-256 hashes and byte sizes. Runtime media are restored
+at the relative locations used by Beamer; harmless `./` and repeated path
+separators are normalized without changing the PDF. Optional editable sources
+live under `source/` and are recorded separately in the manifest.
+
+## Install the released package
+
+```bash
+python -m pip install beamerpkg
+beamerpkg present talk.beamerpkg
+```
+
+The published 1.2.0 release supports pdfpc. To use the spatial route before the
+next release, use a checkout or a locally built wheel as described below.
 
 ## Install for development
 
-Requires Python 3.11+ and Poetry.
+Requires Python 3.11+ and Poetry. To present through pdfpc, install pdfpc and
+the system codecs required by your media. Python packing and inspection do
+not need pdfpc, TeX or Node.
 
 ```bash
 poetry install
 ```
 
 The only runtime Python dependency is `pypdf`, used to inspect PDF annotations.
+
+For spatial presentation from a checkout, also install Node 22.13+ and npm
+(as required by the pinned frontend dependencies) and build the bundled frontend:
+
+```bash
+(cd frontend/spatial && npm ci && npm run build)
+```
+
+Built wheels include these resources. End users of a built wheel need a browser
+for spatial presentation, but no Node/npm. Building the example PDFs requires
+a TeX installation with Beamer, TikZ/PGFPlots, `slashed`, `pdfpc` and
+`appendixnumberbeamer`; the video and poster are already included.
+
+## CLI reference
+
+Run `beamerpkg COMMAND --help` for command-specific help.
+
+| Command | Options and behavior |
+|---|---|
+| `pack PDF` | `--root DIR` sets the media root (default: PDF directory); `--output PATH` / `-o PATH` selects the archive (default: PDF stem plus `.beamerpkg`). |
+| `pack PDF --assets FILE` | Uses an explicit asset list instead of discovering PDF media. |
+| `pack PDF --notes FILE` | Selects notes explicitly; otherwise includes a same-stem `.pdfpc` file beside the PDF when present. |
+| `pack PDF --source PATH` | Repeat to include editable files/directories relative to `--source-root DIR` (default: media root). |
+| `inspect ARCHIVE` | Validates the archive and prints its inventory; `--json` prints the validated manifest. |
+| `present ARCHIVE` | Extracts temporarily and launches pdfpc; `--presenter EXECUTABLE` selects another executable. Arguments after `--` are passed to the presenter. |
+| `spatial ARCHIVE` | Starts the local viewer; `--no-browser` prints the URL without opening a browser. |
+| `texdir` | Prints the installed directory containing `beamerpkg.sty`. |
+
+`pack` prints the output path. Recognized package-validation errors print a
+message on stderr and return status 2. `present` returns the presenter's exit
+status and removes its temporary extraction when the subprocess exits.
 
 ## Optional editable source payload
 
@@ -128,7 +183,9 @@ playback.
 The source snapshot is deliberately opt-in and explicit: beamerpkg does not
 guess which files constitute a reproducible authoring project. Directories are
 included recursively; source paths must remain within `--source-root`, and
-symlinks are rejected.
+symlinks are rejected, including symlinked parent directories within a selected
+path. This is a selected source snapshot; dependencies are not discovered and
+the source is not rebuilt automatically.
 
 An asset needed both by the runtime presentation and by the editable source tree
 may be stored twice. This keeps both trees self-contained and avoids symlink or
@@ -165,6 +222,22 @@ An explicit sidecar remains available as a compatibility/fallback route:
 ```bash
 poetry run beamerpkg pack talk.pdf --root . --assets talk.beamerpkg-assets
 ```
+
+The asset list contains one path per line, relative to the media root. Blank
+lines and lines starting with `#` are ignored; repeated paths are collapsed.
+Selection order is explicit `--assets`, then PDF discovery, then a same-stem
+`.beamerpkg-assets` fallback if discovery found no media. An empty explicit
+list is accepted. Supported references to missing or unsafe files still fail.
+
+| Annotation | Packing | Spatial playback |
+|---|---|---|
+| Standard `/Movie` | Discovers a string or `/UF` / `/F` file specification. | Uses the annotation rectangle; accepts `/Mode /Once` or `/Repeat` and boolean `/ShowControls`. Missing flags remain unknown. |
+| pdfpc `/Link` + `/Launch` | Discovers the file before `?` when options include `autostart`, `loop`, `start` or `stop`. Unrelated launch actions are ignored. | Supports `autostart` and `loop` only, without values or duplicates. Other encoded options fail visibly. |
+
+Spatial playback also requires a visible, nonempty rectangle and a declared
+local asset. Embedded media and arbitrary PDF action execution are unsupported.
+Browser codec and autoplay policies still apply; see the
+[media and support limits](https://github.com/ukerzel/beamerpkg/blob/main/docs/spatial/USER_GUIDE.md#media-and-support-limits).
 
 ## pdfpc autoplay
 
@@ -210,6 +283,7 @@ them into the PDF itself.
 
 Use `--notes path/to/selected-notes.json` to select another notes file. Its bytes
 are restored as `talk.pdfpc`, matching the presentation name so pdfpc can find it.
+Provide a pdfpc-compatible notes file; packing does not convert its contents.
 
 The repository demo contains `examples/demo.pdfpc` with a visible speaker note
 on the first page so this behavior can be checked in presenter view.
@@ -246,6 +320,22 @@ beamerpkg present talk.beamerpkg -- -w both
 This is intentionally transparent passthrough rather than a Beamerpkg-specific
 single-monitor mode. Other pdfpc options work the same way.
 
+## Validation and recent fixes
+
+Packing rejects unsafe paths, source symlinks, duplicate member names,
+file/directory collisions and output paths that would overwrite selected inputs.
+Archive validation checks declared sizes and hashes and rejects undeclared
+files, noncanonical manifest paths and ZIP symlinks. A failed archive write
+keeps an existing output bundle and removes temporary output.
+
+The release-preparation fixes also preserve explicit notes under the PDF stem,
+decode `/ShowControls false` correctly, align relative media-path normalization
+between routes, and turn the tested malformed ZIP/PDF/layout cases into readable
+errors. The 2026-11-03 check passed 208 Python tests and 27 frontend tests;
+Python coverage was 98.25% for statements and 95.39% for branches. This is
+software validation on Python 3.14.4/Chromium, not a broader platform claim.
+See [contributor checks](https://github.com/ukerzel/beamerpkg/blob/main/CONTRIBUTING.md) and the [review record](https://github.com/ukerzel/beamerpkg/blob/main/WORKLOG.md).
+
 ## Demo
 
 The demo uses the full repository assets, a pdfpc metadata sidecar, and an
@@ -270,16 +360,22 @@ package anything special for them. The overlay example deliberately avoids
 `\transduration`: timed PDF pages restart their timer when revisited, which
 makes backward navigation jump forward again.
 
-Build both the mixed autoplay demo and a pure stock-Beamer wrapperless example:
+After installing the Python dependencies, TeX packages and (for spatial use)
+building the frontend, build both demo archives:
 
 ```bash
-git pull --rebase
-poetry install
 ./examples/build_demo.sh
 
 poetry run beamerpkg present examples/demo.beamerpkg
 poetry run beamerpkg present examples/wrapperless.beamerpkg
+poetry run beamerpkg spatial examples/demo.beamerpkg
 ```
+
+This script regenerates the example PDFs/packages and writes
+`examples/demo.spatial.json`. To transport the authored demo, copy that sidecar
+with `demo.beamerpkg`; pdfpc needs only the archive. For isolated developer
+fixtures that preserve example outputs, run
+`poetry run python tools/build_spatial_fixtures.py`.
 
 `examples/demo.tex` also embeds speaker notes and a 10-minute countdown via
 the standard `pdfpc` LaTeX package, so they travel inside the PDF itself. The
@@ -296,5 +392,15 @@ standard wrapperless `\movie` slide that is click-to-start, followed by one
 pdfpc-specific `\pkgpdfpcmovie[autostart&loop]` slide that starts
 automatically.
 
-See [`docs/MVP.md`](https://github.com/ukerzel/beamerpkg/blob/main/docs/MVP.md) for the original acceptance test and
-[`docs/NEXT_STEPS.md`](https://github.com/ukerzel/beamerpkg/blob/main/docs/NEXT_STEPS.md) for the remaining work.
+## Documentation
+
+- [Spatial user guide](https://github.com/ukerzel/beamerpkg/blob/main/docs/spatial/USER_GUIDE.md): setup, demo, controls,
+  current sidecar schema and support limits.
+- [Contributing](https://github.com/ukerzel/beamerpkg/blob/main/CONTRIBUTING.md) and [frontend development](https://github.com/ukerzel/beamerpkg/blob/main/frontend/spatial/README.md):
+  Python/browser checks and installed-distribution verification.
+- [Current status and release preparation](https://github.com/ukerzel/beamerpkg/blob/main/docs/NEXT_STEPS.md): completed work,
+  release steps and deferred scope.
+- [MVP history](https://github.com/ukerzel/beamerpkg/blob/main/docs/MVP.md), [first spatial contract](https://github.com/ukerzel/beamerpkg/blob/main/docs/SPATIAL_MVP.md),
+  [broader design](https://github.com/ukerzel/beamerpkg/blob/main/docs/SPATIAL_PLAN.md) and dated spatial reports: decisions
+  and evidence at their recorded stages. The broader editor/save design is
+  not the implemented feature set.

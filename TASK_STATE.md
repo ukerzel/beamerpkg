@@ -77,7 +77,22 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
-2026-11-03 release-preparation review (current user request): fixed input-file
+2026-11-03 documentation verification: updated the CLI/media reference, setup,
+spatial controls/schema/limits, contributor/build instructions and current status.
+Removed obsolete policy exclusions for implemented media discovery/source payloads
+and clearly labelled historical plans/reports. Checked 22 tracked Markdown files,
+local links, shell/JSON syntax and all CLI options. The new layout example passes
+Python and browser validators and a temporary end-to-end CLI/server smoke check.
+Evidence is under `build/release-review/docs-*`; see `WORKLOG.md`. The user
+authorized committing/pushing these documentation changes after a release
+cold read. That read corrected README links for PyPI and added released-package
+installation instructions. Fresh 208 Python / 27 frontend tests, static checks,
+strict Twine validation, sdist rebuild without Node and installed-wheel proof
+pass. Code/docs are ready within their documented scope; recommended version
+1.3.0 still needs a version bump, release wording and final versioned build.
+No tag, upload or public release has been made.
+
+2026-11-03 release-preparation review: fixed input-file
 overwrite, archive member collisions/noncanonical manifest paths, explicit notes
 naming, malformed-input exceptions, PDF false-controls decoding, and media path
 normalization between routes. The user then requested additional coverage before
@@ -86,9 +101,9 @@ Added 140 Python cases in total: 208 Python and 27 frontend tests pass. Python
 statement coverage is 98.25%, branch coverage 95.39%, combined 97.40% (baseline
 combined 81.85%). Ruff, mypy, Poetry lock, TypeScript/build,
 wheel/sdist inventory and isolated installed-wheel route proof pass. Detailed
-findings and evidence paths are in `WORKLOG.md`. User authorized commit/push of
-these reviewed fixes. Version remains 1.2.0 and builds are local validation
-artifacts. Version selection, release metadata, tagging and publication remain
+findings and evidence paths are in `WORKLOG.md`. These fixes were committed and
+pushed to `main` as `f1db522`. Version remains 1.2.0 and builds are local
+validation artifacts. Version selection, release metadata, tagging and publication remain
 for the release step. No new live pdfpc or Python-version/browser-matrix
 qualification is claimed.
 
@@ -97,6 +112,8 @@ after the user's walkthrough. The pre-merge audit fixes are in `b995141`. Final
 check: 68 Python and 27 frontend tests, Ruff, mypy, TypeScript and the
 installed-wheel proof. Remaining deferred work is in `issues.md` (Deferred).
 The history below is kept as it was.
+
+## Historical spatial checkpoint (2026-11-01)
 
 The user-authorized first spatial MVP S0–S4 is technically complete on
 `feat/spatial-prototype`; stop after final S4 commit/push. Human walkthrough

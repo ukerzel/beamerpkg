@@ -1,6 +1,15 @@
 # beamerpkg Spatial v0.3 — Optional Presentation Route & Codex Handover
 
-**Status:** Broader design; the first read-only MVP is technically qualified through S0–S4 in [SPATIAL_MVP.md](SPATIAL_MVP.md). See [evaluation](spatial/PROTOTYPE_EVALUATION.md). Human walkthrough is pending; full editor/save scope remains deferred.
+**Status (2026-11-03):** The read-only S0–S4 route was merged into `main` after
+the user's walkthrough. Full editor/save scope remains deferred. Use the
+[current user guide](spatial/USER_GUIDE.md), including its implemented sidecar
+schema and limits, for the shipped checkout behavior.
+
+The body below preserves the broader design as written on 2026-11-01.
+Editor/save APIs, editing modes and later gates are proposals, not implemented
+features. Its baseline code descriptions, pending decisions and authorization
+limits refer to that date; see [current status](NEXT_STEPS.md) and the dated
+[technical evaluation](spatial/PROTOTYPE_EVALUATION.md) for later outcomes.
 
 **Date:** 2026-11-01
 

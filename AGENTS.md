@@ -24,8 +24,8 @@ configuration unless a concrete failure requires it.
 ## Development rules
 
 - Python >= 3.11; manage the environment and developer dependencies with Poetry.
-- Keep runtime dependencies empty unless a dependency is necessary for an
-  accepted requirement.
+- The runtime dependency `pypdf` supports accepted PDF media discovery. Add
+  further runtime dependencies only for an accepted requirement.
 - Use the `src/` layout.
 - Prefer TDD for behavioral changes; tests must target real failure modes rather
   than coverage for its own sake.
@@ -40,10 +40,13 @@ configuration unless a concrete failure requires it.
 - autoplay workarounds;
 - embedded media inside PDF;
 - HTML/reveal.js export;
-- automatic `/Movie` annotation discovery;
 - Windows/macOS integration;
-- packaging LaTeX source;
+- automatic LaTeX dependency discovery or rebuilding packaged sources;
 - PowerPoint/Keynote compatibility.
+
+Standard `/Movie` and recognized pdfpc `/Launch` media discovery, optional
+media, and explicitly selected editable sources are implemented requirements;
+see `README.md` and the historical extensions in `docs/MVP.md`.
 
 Before extending scope, update `docs/MVP.md` with the concrete failure or
 requirement that justifies the extension.

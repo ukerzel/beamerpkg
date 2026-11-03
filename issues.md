@@ -2,15 +2,23 @@
 
 ## Active Batch
 
-SPATIAL-001: first optional spatial presentation route, on
-`feat/spatial-prototype`. User authorized plan/cold-read/commit/push followed by
-execution on 2026-11-01. Contract: [docs/SPATIAL_MVP.md](docs/SPATIAL_MVP.md).
+SPATIAL-001: first optional spatial presentation route, implemented on
+`feat/spatial-prototype` and now merged. User authorized plan/cold-read/commit/push
+followed by execution on 2026-11-01. Contract: [docs/SPATIAL_MVP.md](docs/SPATIAL_MVP.md).
 
 Current state: **merged into `main` on 2026-11-03** at the user's instruction,
 after the user's own walkthrough of the demo talk on both routes. A pre-merge
-audit fixed seven verified findings (`b995141`). Final check: 68 Python and 27
-frontend tests pass, plus Ruff, mypy, TypeScript and the installed-wheel proof.
-No further implementation rung is active. Earlier history follows.
+audit fixed seven verified findings (`b995141`); the merge check had 68 Python
+and 27 frontend tests passing. The subsequent release-preparation review and
+coverage expansion were pushed as `f1db522`: 208 Python and 27 frontend tests,
+98.25% statement / 95.39% branch coverage, Ruff, mypy, lock, TypeScript/build
+and installed-wheel proof pass. The documentation verification is complete;
+see [WORKLOG](WORKLOG.md). No further implementation rung is active.
+
+## Historical execution record (2026-11-01–02)
+
+The pending/stop instructions and test counts below belong to those dated
+checkpoints; the merge and release review above supersede their status.
 
 S0–S4 were technically complete with a stop at human walkthrough; product
 acceptance was pending and not implied by software qualification.

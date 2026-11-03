@@ -1,68 +1,59 @@
-# Next steps after wrapperless discovery
+# Current status and release preparation
 
-The core path is now:
+Updated 2026-11-03. The spatial route is merged into `main`; the reviewed fixes
+and expanded tests were committed and pushed as `f1db522`. Package metadata
+still says 1.2.0. A new public release has not been made.
 
-```text
-ordinary Beamer \movie
-        ↓
-PDF /Movie annotation
-        ↓
-beamerpkg pack discovers local media
-        ↓
-relocatable .beamerpkg
-        ↓
-pdfpc
-```
+## Implemented
 
-The legacy `.beamerpkg-assets` route remains only as an explicit/fallback
-compatibility path.
+- PDF-only and multimedia `.beamerpkg` archives, optional pdfpc notes, and
+  explicitly selected editable source snapshots.
+- Standard Beamer `/Movie` and recognized pdfpc `/Launch` media discovery;
+  explicit asset lists and the legacy same-stem fallback remain supported.
+- Independent `present`/pdfpc and `spatial` commands. Spatial provides grouped
+  overlays, detail/world viewpoints, named paths, exploration/return, backup
+  clusters, overview step jumps, minimap, previews and keyboard/clicker controls.
+- Read-only adjacent layouts bound to the exact PDF path/hash; bundled offline
+  frontend resources and a bounded, allowlisted loopback server.
+- Release-review fixes for input overwrites, member/path collisions, notes
+  naming, malformed inputs, false video-control flags, media normalization and
+  symlinked source parents.
 
-## Completed: presenter argument passthrough
+The 2026-11-03 review passed 208 Python tests and 27 frontend tests, static/build
+checks and an isolated installed-wheel proof. Python coverage was 98.25% for
+statements and 95.39% for branches. Detailed evidence paths and limitations
+are recorded in [WORKLOG](../WORKLOG.md).
 
-Arguments after `--` are forwarded verbatim to pdfpc before the extracted PDF
-filename. For example, a one-monitor setup can request both pdfpc windows with:
+The follow-up release cold read passed strict Twine metadata/README validation,
+an sdist-to-wheel rebuild without Node (identical wheel member bytes), and a
+fresh installed-wheel proof. README documentation links are absolute so they
+also work on PyPI. No further code or documentation blockers were found within
+the documented Linux/Chromium scope. The recommended next version is 1.3.0.
 
-```bash
-beamerpkg present talk.beamerpkg -- -w both
-```
+## Release preparation
 
-This keeps display policy in pdfpc while preserving `.beamerpkg` as the launch
-artifact.
+1. Choose the next package version; the documentation review is complete.
+   Update both `pyproject.toml` and `src/beamerpkg/__init__.py` when making
+   that change. Replace the pre-release wording in README and the spatial guide
+   with the new release's availability before the final build.
+2. Follow the Python, frontend and installed-distribution checks in
+   [CONTRIBUTING](../CONTRIBUTING.md) and the
+   [frontend guide](../frontend/spatial/README.md). Rebuild frontend assets
+   before producing the final wheel/sdist.
+3. Make the release/tag/publication decision explicitly. The local
+   `build/spatial-dist` artifacts used for validation still have version 1.2.0;
+   they are not the next release. PyPI does not allow reusing published filenames;
+   see its [upload troubleshooting](https://docs.pypi.org/publishing/troubleshooting/#why-am-i-getting-a-filename-or-contents-already-exists-or-filename-has-been-previously-used-error).
 
-## 1. Autoplay compatibility
+## Deferred scope
 
-The current demo has a working pdfpc-specific autoplay path:
+There is no active implementation ladder after this review. A graphical editor,
+writable save API, archive-contained spatial layouts, presenter notes/timer/next
+preview, dual-monitor spatial presentation and broader OS/browser qualification
+need a separate decision. Desktop/file associations and deprecating the legacy
+helper have not been implemented or scheduled.
 
-```latex
-\pkgpdfpcmovie[autostart&loop]{poster}{media/video.mp4}
-```
-
-The packer recognizes the resulting `/Launch` action only when it carries known
-pdfpc media options (`autostart`, `loop`, `start`, or `stop`). Unrelated
-PDF launch actions are ignored rather than packaged.
-
-Keep this separate from standard `\movie`: autoplay is a viewer capability,
-not a container property.
-
-## 2. Desktop/file association
-
-After the CLI stabilizes, associate `.beamerpkg` with a thin launcher on
-Linux/macOS/Windows. This should call the same validation/extraction code rather
-than introduce a second application architecture.
-
-## 3. Packaging/release polish
-
-- Poetry lock file included for reproducible development as of 1.2.0;
-- add CI for pytest/Ruff/mypy and the synthetic PDF tests;
-- decide whether the legacy sidecar helper should eventually be deprecated;
-- document supported PDF annotation forms as a small versioned compatibility
-  contract.
-
-## Non-goals carried forward
-
-- HTML/reveal.js rendering;
-- custom PDF renderer;
-- custom video player;
-- PowerPoint/Keynote import/export;
-- packaging arbitrary PDF `/Launch` targets;
-- speculative package metadata without a concrete consumer.
+The [broader spatial design](SPATIAL_PLAN.md) preserves ideas for editor/save
+work. It does not describe implemented features or authorize those extensions.
+Use the [spatial guide](spatial/USER_GUIDE.md) for the current workflow and
+support limits.

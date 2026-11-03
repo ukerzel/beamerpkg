@@ -18,6 +18,6 @@ Project-specific deviations are intentional:
   omitted because they are unrelated to the MVP;
 - agent/review documents are narrowed to the current MVP rather than carrying
   template-maintenance history into the new repository;
-- `poetry.lock` is not generated in this seed because Poetry is unavailable in
-  the execution environment used to create it. Run `poetry lock` with the
-  project's Poetry installation before the first dependency update/release.
+- `poetry.lock` was absent when the seed was created because Poetry was
+  unavailable in that execution environment. It has been committed since
+  1.2.0; use `poetry install` and `poetry check --lock` for current development.

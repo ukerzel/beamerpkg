@@ -1,5 +1,10 @@
 # MVP design and result
 
+This document preserves the original 2026-09-30 experiment and subsequent
+requirements/decisions. The original questions and next steps below are
+historical. Use [README](../README.md) and the
+[spatial guide](spatial/USER_GUIDE.md) for current commands and support limits.
+
 ## Question tested
 
 Can an ordinary Beamer PDF that uses external movie annotations be made portable
@@ -171,3 +176,18 @@ Seven were verified as real and fixed with regression tests (`b995141`):
 
 The pdfpc route is unchanged and independent. The spatial route stays optional
 and read-only, and is not yet in a PyPI release.
+
+### Packaging capabilities and release-review corrections (2026-11-03)
+
+The implemented container requirements also include wrapperless media discovery,
+optional media, automatic or explicitly selected pdfpc notes, and selected
+editable source files/directories under `source/`. Sources are explicit snapshots;
+automatic LaTeX dependency discovery and rebuilding remain outside scope.
+
+The release review corrected input-file overwrites, archive path/member
+collisions, explicit notes naming, malformed-input errors, PDF false-control
+decoding, relative media normalization and symlinked source parents. It added
+regressions and expanded validation to 208 Python tests, with the existing 27
+frontend tests and installed-wheel proof passing. The archive schema remains v1.
+See [WORKLOG](../WORKLOG.md) for evidence and the
+[CLI/media reference](../README.md) for the resulting behavior.

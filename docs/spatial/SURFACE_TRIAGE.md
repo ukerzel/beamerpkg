@@ -1,5 +1,10 @@
 # First-MVP surface triage
 
+Historical classification at the 2026-11-01 S4 transition. The user subsequently
+walked through the demo and authorized the merge into `main` on 2026-11-03.
+The pending actions and branch boundary below describe that earlier checkpoint;
+see the [current status](../NEXT_STEPS.md) for later decisions.
+
 ## Triage Scope
 
 - Scope: the optional spatial route, adapter experiment, fixture producers and

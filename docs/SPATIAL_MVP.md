@@ -96,6 +96,13 @@ Predeclared engineering bounds for this slice (not scientific thresholds):
 | Retained canvas buffers | 128 MiB; 16 million pixels per surface, max dimension 8,192 |
 | Render work | One PDF render at a time; 320px overview thumbnails; bounded active surfaces |
 
+Implementation update (2026-11-03): the table records the original engineering
+contract. The current renderer uses stricter four-million-pixel detail buffers
+and a shared 18.5-million-pixel thumbnail budget (at most one million pixels
+each), rather than a fixed 320px thumbnail width. Up to 48 small viewpoint
+previews fit within the overall 128 MiB canvas budget. Current support limits
+are documented in the [user guide](spatial/USER_GUIDE.md#media-and-support-limits).
+
 Validate ZIP metadata and actual decompressed byte counts before calling the
 existing eager validator. Use a private admitted copy so the archive cannot be
 replaced between preflight and validation. Existing package/CLI behavior is not

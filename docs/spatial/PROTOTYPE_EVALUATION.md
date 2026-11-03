@@ -1,5 +1,11 @@
 # First spatial MVP: technical evaluation
 
+Historical S4 evaluation: the results and pending decisions below describe
+2026-11-01. On 2026-11-03 the user completed a demo walkthrough and authorized
+merging the route into `main`; subsequent fixes and current validation are in
+[WORKLOG](../../WORKLOG.md). Use the [user guide](USER_GUIDE.md) for current
+instructions. The dated evidence below is retained without changing its claims.
+
 Date: 2026-11-01. Branch: `feat/spatial-prototype`.
 Decision: the read-only first-MVP technical ladder S0–S4 is qualified on the
 tested Linux/Chromium setup. Stop at the human walkthrough; do not start the

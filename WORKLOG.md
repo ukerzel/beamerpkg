@@ -225,3 +225,76 @@ and refreshed the isolated installed-wheel proof for the final Python source.
 Publication/version boundaries and live-pdfpc/browser-matrix limitations above
 still apply. The user authorized committing and pushing the complete reviewed
 fix/test set; the unrelated PDF remains excluded.
+
+## 2026-11-03 — Documentation verification
+
+Reviewed all 22 tracked Markdown files against the current Python CLI/package,
+spatial validators/server, browser navigation/media/rendering, demo/fixture
+producers and pinned frontend dependency manifests.
+
+- README now lists every command/option, media selection precedence, notes and
+  source handling, supported annotation semantics, recent fixes, spatial
+  features and documentation entry points.
+- The spatial guide now documents the implemented sidecar schema with a usable
+  example, controls/path switching/backup detours, media behavior and resource
+  limits. It no longer uses the broader editor/save proposal as a user manual.
+- Setup instructions name Python/TeX and frontend prerequisites. The pinned
+  frontend dependencies require Node 22.13+; current tools are Node 24.13.0 and
+  npm 11.21.1. Developer instructions distinguish probe/dev resources from the
+  built production viewer and document the installed-wheel proof prerequisites.
+- Updated current status after merge and `f1db522`; removed obsolete current
+  exclusions for automatic media discovery and selected LaTeX source payloads.
+  Historical plans, decisions, test counts and evidence remain labelled with
+  their original context. No retained evidence files were rewritten.
+
+Verification: 64 local links/heading targets resolve; 28 shell blocks pass
+`bash -n`; both JSON blocks parse; all CLI commands and non-help options appear
+in README. The new layout example passes Python validation through the live
+loopback server and the browser's `parseProject` validator. A temporary project
+also exercises packing/inspection with assets, explicit notes, sources/output,
+presenter argument passthrough, `texdir`, unchanged PDF bytes and notes excluded
+from the browser surface. The unrelated example PDF's hash is unchanged.
+
+Local receipts: `build/release-review/docs-checks.json`, `docs-smoke.json`,
+`docs-browser-model.json` and the documented example's validated project JSON.
+The latest published PyPI page was checked for the distinction between 1.2.0
+and the unreleased checkout features. This pass changes documentation only;
+the 208-test/27-frontend validation above remains the code checkpoint. No full
+test suite or live pdfpc rendering was rerun for these documentation edits.
+Changes are uncommitted; version/tag/publication are unchanged.
+
+### Release cold read and documentation publication
+
+User authorized commit/push and requested a cold read for release/PyPI readiness.
+The read found one additional documentation issue: relative README links would
+resolve incorrectly on PyPI. Converted its documentation links to absolute
+repository URLs and added released-package installation instructions. The other
+manuals retain their local navigation; dated results and retained evidence stay
+in their original context.
+
+Fresh validation: 208 Python tests, 27 frontend tests, Ruff, mypy, Poetry lock,
+TypeScript/production build and isolated installed-wheel proof pass. Strict
+`twine check` passes for wheel and sdist. Rebuilding a wheel from the sdist with
+Node absent from PATH produces identical bytes for every wheel member (219
+members), including frontend resources, notices, TeX helper and metadata.
+The first rebuild check accidentally resolved the local `build/` directory as
+a Python namespace instead of the absent PyPA build tool; retained the tooling
+failure log and reran successfully through the existing Poetry build command.
+Twine was installed in an isolated temporary environment; project dependencies
+and metadata were not changed.
+
+Readiness verdict: no remaining code/documentation blocker found within the
+documented Python 3.14.4/Linux/Chromium qualification. Recommend 1.3.0 for the
+new spatial route. Upload is not ready as-is: both metadata version fields still
+say 1.2.0, which already exists on PyPI. The release step must bump the version,
+replace pre-release availability wording and produce/check the final versioned
+artifacts before tagging/upload. PyPI upload authentication was not tested;
+no credentials were read and no upload/tag/release was attempted. The latest
+PyPI project page and filename-reuse rules were checked against the official
+site. Live pdfpc and additional Python/browser platforms were not requalified.
+
+Local receipts: `build/release-review/cold-read-packaging.json`,
+`cold-read-twine-check.log`, `cold-read-sdist-rebuild.log`,
+`cold-read-frontend-tests.log` and `cold-read-installed-proof.log`.
+The user-authorized documentation commit excludes the unrelated
+`examples/wrapperless.pdf` and generated build artifacts.
