@@ -2,8 +2,10 @@
 
 Updated 2026-11-03. The spatial route is merged into `main`; the reviewed fixes
 and expanded tests were committed and pushed as `f1db522`. Documentation and
-release preflight were pushed as `279d545`. The user then authorized version
-1.3.0, the GitHub tag and PyPI publication. Version metadata is now 1.3.0.
+release preflight were pushed as `279d545`. Version 1.3.0 is now published on
+[PyPI](https://pypi.org/project/beamerpkg/1.3.0/), with annotated GitHub tag
+[`v1.3.0`](https://github.com/ukerzel/beamerpkg/tree/v1.3.0) at `6b0af39`.
+The [publication receipt](releases/1.3.0.json) records the exact hashes and URLs.
 
 ## Implemented
 
@@ -34,9 +36,10 @@ the documented Linux/Chromium scope.
 ## Release 1.3.0
 
 The release retains the v1 container format and existing commands. The final
-wheel and sdist are built with bundled frontend assets, checked with strict
-Twine validation and installed outside the checkout before publication. The
-sdist must also rebuild a matching wheel without Node. Checks are documented in
+wheel and sdist include bundled frontend assets and passed strict Twine
+validation and installation outside the checkout. The sdist rebuilt a matching
+wheel without Node. Both public downloads match the validated local bytes.
+Checks are documented in
 [CONTRIBUTING](../CONTRIBUTING.md) and the
 [frontend guide](../frontend/spatial/README.md).
 

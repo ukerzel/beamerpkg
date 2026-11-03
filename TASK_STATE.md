@@ -77,14 +77,14 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
-2026-11-03 release execution: the user authorized release 1.3.0, an annotated
-GitHub tag and PyPI publication. Both version fields and release wording are
-updated. Final versioned distributions passed 208 Python / 27 frontend tests,
-static/build checks, strict Twine validation, sdist-to-wheel rebuild without
-Node and the isolated installed-wheel proof. Publication is proceeding through
-the annotated tag and exact-file PyPI upload; completion will be recorded after
-remote verification. Receipts: `build/release-1.3.0/`.
-Preserve `examples/wrapperless.pdf` and older files in `dist/`.
+2026-11-03 release complete: 1.3.0 is published on PyPI. The annotated GitHub
+tag `v1.3.0` points to release commit `6b0af39c94dfb608f1585b9b5d7a09349d448ae2`.
+Both public distributions were downloaded and verified against the final local
+size/SHA-256 values. Receipt: [docs/releases/1.3.0.json](docs/releases/1.3.0.json).
+Final gates passed: 208 Python / 27 frontend tests, static/build checks, strict
+Twine validation, sdist-to-wheel rebuild without Node and isolated installed-wheel
+proof. Local evidence: `build/release-1.3.0/`. No release work remains active.
+The unrelated `examples/wrapperless.pdf` and older files in `dist/` are preserved.
 
 ## Historical release-preparation checkpoints (2026-11-03)
 

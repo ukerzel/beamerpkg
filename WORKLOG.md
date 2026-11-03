@@ -318,3 +318,19 @@ branches. Release bytes in `dist/` match `build/release-1.3.0/packaging.json`.
 Proceeding with the release commit, annotated tag and upload of the exact two
 1.3.0 filenames. No source, media, PDF rendering or runtime dependency change
 is part of the version bump.
+
+Publication completed: release commit `6b0af39c94dfb608f1585b9b5d7a09349d448ae2`
+and annotated tag `v1.3.0` reached GitHub. Twine uploaded exactly the 1.3.0 wheel
+and sdist to PyPI. Official PyPI JSON and actual public downloads both match:
+
+- `beamerpkg-1.3.0-py3-none-any.whl`: 2,777,101 bytes;
+  SHA-256 `640b5c75a68a746b1d604b9cd8153d597700e04b30bea353b5e1fa0aac8e5641`.
+- `beamerpkg-1.3.0.tar.gz`: 2,635,830 bytes;
+  SHA-256 `db4477897ab20ff7d602bcc7256015ff5de687930adf0868a56d89fc8e1d4a87`.
+
+The [public release receipt](docs/releases/1.3.0.json) binds the tag/commit,
+artifact URLs/hashes, validation results and qualification limits. Credentials
+were passed only through the upload subprocess environment; none was printed,
+stored or hashed. This post-publication checkpoint records completion without
+moving the release tag. The unrelated example PDF and earlier release files
+remain untouched.

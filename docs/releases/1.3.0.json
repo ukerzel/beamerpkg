@@ -1,0 +1,34 @@
+{
+  "version": "1.3.0",
+  "published": true,
+  "pypi": "https://pypi.org/project/beamerpkg/1.3.0/",
+  "github_tag": "https://github.com/ukerzel/beamerpkg/tree/v1.3.0",
+  "tag": "v1.3.0",
+  "release_commit": "6b0af39c94dfb608f1585b9b5d7a09349d448ae2",
+  "artifacts": {
+    "beamerpkg-1.3.0-py3-none-any.whl": {
+      "size": 2777101,
+      "sha256": "640b5c75a68a746b1d604b9cd8153d597700e04b30bea353b5e1fa0aac8e5641",
+      "url": "https://files.pythonhosted.org/packages/f7/bd/e0d060be08c327117df3be6a501657ce30905d4e7f96a0f0e4739b8b54ac/beamerpkg-1.3.0-py3-none-any.whl",
+      "download_verified": true
+    },
+    "beamerpkg-1.3.0.tar.gz": {
+      "size": 2635830,
+      "sha256": "db4477897ab20ff7d602bcc7256015ff5de687930adf0868a56d89fc8e1d4a87",
+      "url": "https://files.pythonhosted.org/packages/f5/c1/b2b523f41e5d0466a538a6b75c7c71bfc6ecc7de96f38ed2c3a45fd20379/beamerpkg-1.3.0.tar.gz",
+      "download_verified": true
+    }
+  },
+  "python_tests": 208,
+  "frontend_tests": 27,
+  "validation": [
+    "Ruff",
+    "mypy",
+    "Poetry lock",
+    "TypeScript/frontend build",
+    "strict Twine check",
+    "sdist rebuild without Node; identical wheel members",
+    "isolated installed-wheel proof"
+  ],
+  "scope": "Python 3.14.4, Linux/Chromium; presenter invocation checked with a test executable, no new live pdfpc rendering check"
+}
