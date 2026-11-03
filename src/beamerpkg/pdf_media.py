@@ -181,8 +181,10 @@ def discover_pdf_media_placements(
                     target = _file_spec_text(action.get("/F"))
                     if target is None or _pdfpc_launch_media_reference(target) is None:
                         continue
-                    raw, _, query = target.partition("?")
-                    options = query.split("&")
+                    # Normalize like pack does: outer whitespace and empty
+                    # options are ignored; anything else must be supported.
+                    raw, _, query = target.strip().partition("?")
+                    options = [v for v in query.split("&") if v]
                     if len(set(options)) != len(options) or any(
                         v not in {"autostart", "loop"} for v in options
                     ):
@@ -206,7 +208,7 @@ def discover_pdf_media_placements(
                 box, media_box = page.cropbox, page.mediabox
                 if min(max(x0, x1), float(box.right), float(media_box.right)) <= max(
                     min(x0, x1), float(box.left), float(media_box.left)
-                ) or min(max(y0, y1), float(box.top)) <= max(
+                ) or min(max(y0, y1), float(box.top), float(media_box.top)) <= max(
                     min(y0, y1), float(box.bottom), float(media_box.bottom)
                 ):
                     raise PdfMediaError("empty visible media rectangle")

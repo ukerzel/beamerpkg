@@ -265,3 +265,31 @@ test('autostart rejection has a working manual fallback, no browser-policy overr
     });
     expect(await page.locator('video').evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
 });
+
+test('a video played after a history restore keeps playing when the canvas is dragged', async ({
+    page,
+}) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open(page);
+    await page.getByRole('button', { name: 'Overview', exact: true }).click();
+    await page.getByRole('button', { name: 'Go to step 5', exact: true }).click();
+    await expect(page.getByTestId('position')).toContainText('guided step 5/');
+    const video = page.locator('video');
+    // Overview and back restores the guided step with a paused bookmark.
+    await page.keyboard.press('o');
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('position')).toContainText('guided step 5/');
+    await page.getByRole('button', { name: 'Play video', exact: true }).click();
+    await expect
+        .poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime))
+        .toBeGreaterThan(0.3);
+    const before = await video.evaluate((v: HTMLVideoElement) => v.currentTime);
+    // Dragging clears the bookmark; that must not re-activate (pause/rewind) the video.
+    await page.mouse.move(40, 420);
+    await page.mouse.down();
+    await page.mouse.move(140, 440, { steps: 6 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+    expect(await video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(before);
+});

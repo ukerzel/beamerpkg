@@ -135,3 +135,42 @@ def test_referenced_nonmedia_payload_cannot_be_served_as_executable_html(
         instance.shutdown()
         instance.server_close()
         worker.join(timeout=3)
+
+
+def test_runtime_files_are_served_when_the_temp_dir_is_a_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # macOS: /var -> /private/var. Boundaries must compare resolved paths.
+    import tempfile
+
+    from pypdf import PdfWriter
+
+    from beamerpkg.package import pack_package
+    from beamerpkg.spatial_project import load_project
+
+    real = tmp_path / "real"
+    real.mkdir()
+    (tmp_path / "link").symlink_to(real)
+    monkeypatch.setattr(tempfile, "tempdir", str(tmp_path / "link"))
+    static = tmp_path / "static"
+    static.mkdir()
+    (static / "index.html").write_text("<html>spatial</html>")
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    writer.add_blank_page(width=320, height=180)
+    writer.write(pdf)
+    with load_project(pack_package(pdf, root=tmp_path)) as project:
+        instance = make_server(project, static)
+        worker = threading.Thread(target=instance.serve_forever, daemon=True)
+        worker.start()
+        try:
+            status, _, body = request(
+                instance,
+                "/runtime/document.pdf",
+                Host=f"127.0.0.1:{instance.server_port}",
+            )
+        finally:
+            instance.shutdown()
+            instance.server_close()
+            worker.join(timeout=3)
+    assert status == 200 and body.startswith(b"%PDF")

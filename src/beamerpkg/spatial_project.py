@@ -97,6 +97,46 @@ class SpatialProject:
     data: dict[str, Any]
 
 
+def _page_geometry(pdf: Path) -> list[dict[str, Any]]:
+    """Visible size and rotation of every page, as PDF.js will show it."""
+    try:
+        reader = PdfReader(pdf)
+        if not 0 < len(reader.pages) <= 200:
+            raise PackageError("spatial PDF page limit exceeded")
+        pages: list[dict[str, Any]] = []
+        for page in reader.pages:
+            crop, media = page.cropbox, page.mediabox
+            box = [
+                max(float(crop.left), float(media.left)),
+                max(float(crop.bottom), float(media.bottom)),
+                min(float(crop.right), float(media.right)),
+                min(float(crop.top), float(media.top)),
+            ]
+            unit = float(page.get("/UserUnit", 1))
+            rotation = page.rotation % 360
+            width, height = (box[2] - box[0]) * unit, (box[3] - box[1]) * unit
+            if (
+                rotation not in (0, 90, 180, 270)
+                or unit <= 0
+                or not all(math.isfinite(v) for v in (*box, width, height, unit))
+                or width <= 0
+                or height <= 0
+            ):
+                raise PackageError("invalid spatial page geometry")
+            if rotation in (90, 270):
+                width, height = height, width
+            pages.append(
+                {"width": width, "height": height, "rotation": rotation, "box": box}
+            )
+        return pages
+    except PackageError:
+        raise
+    except Exception as exc:
+        # pypdf hands back raw PDF objects, so malformed pages can also raise
+        # TypeError, KeyError or AttributeError; report them, not a traceback.
+        raise PackageError(f"spatial project failed: {exc}") from exc
+
+
 @contextmanager
 def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialProject]:
     """Prepare a validated project for the lifetime of a local presentation."""
@@ -105,7 +145,9 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
             admitted_archive(package, limits) as admitted,
             tempfile.TemporaryDirectory(prefix="beamerpkg-spatial-") as tmp,
         ):
-            root = Path(tmp)
+            # Resolve so the server's boundary checks, which compare resolved
+            # paths, also hold under a symlinked temp dir (macOS /var).
+            root = Path(tmp).resolve()
             manifest = extract_package(admitted, root)["manifest"]
             pdf_record = manifest["presentation"]
             pdf = root / pdf_record["path"]
@@ -113,34 +155,7 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
                 "pdf_path": pdf_record["path"],
                 "pdf_sha256": pdf_record["sha256"],
             }
-            reader = PdfReader(pdf)
-            if not 0 < len(reader.pages) <= 200:
-                raise PackageError("spatial PDF page limit exceeded")
-            pages: list[dict[str, Any]] = []
-            for page in reader.pages:
-                crop, media = page.cropbox, page.mediabox
-                box = [
-                    max(float(crop.left), float(media.left)),
-                    max(float(crop.bottom), float(media.bottom)),
-                    min(float(crop.right), float(media.right)),
-                    min(float(crop.top), float(media.top)),
-                ]
-                unit = float(page.get("/UserUnit", 1))
-                rotation = page.rotation % 360
-                width, height = (box[2] - box[0]) * unit, (box[3] - box[1]) * unit
-                if (
-                    rotation not in (0, 90, 180, 270)
-                    or unit <= 0
-                    or not all(math.isfinite(v) for v in (*box, width, height, unit))
-                    or width <= 0
-                    or height <= 0
-                ):
-                    raise PackageError("invalid spatial page geometry")
-                if rotation in (90, 270):
-                    width, height = height, width
-                pages.append(
-                    {"width": width, "height": height, "rotation": rotation, "box": box}
-                )
+            pages = _page_geometry(pdf)
             assets = {
                 record["path"]: root / record["path"] for record in manifest["assets"]
             }
@@ -151,7 +166,8 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
                 raise PackageError("spatial media placement limit exceeded")
             sidecar = package.with_suffix(".spatial.json")
             layout = default_layout(source, pages)
-            if sidecar.exists():
+            authored = sidecar.exists()
+            if authored:
                 with sidecar.open("rb") as handle:
                     raw = handle.read(limits.sidecar_bytes + 1)
                 if len(raw) > limits.sidecar_bytes:
@@ -166,7 +182,7 @@ def load_project(package: Path, limits: Limits = Limits()) -> Iterator[SpatialPr
                     "pages": pages,
                     "placements": placements,
                     "layout": layout,
-                    "authored_layout": sidecar.exists(),
+                    "authored_layout": authored,
                 },
             )
     except PackageError:

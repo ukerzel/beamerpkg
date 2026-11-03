@@ -96,3 +96,17 @@ def test_page_geometry_uses_visible_crop_media_intersection(tmp_path: Path) -> N
     package = pack_package(pdf)
     with load_project(package) as project:
         assert project.data["pages"][0]["box"] == [0, 0, 320, 180]
+
+
+def test_malformed_page_values_fail_as_package_errors(tmp_path: Path) -> None:
+    # pypdf hands back raw objects; a wrong type must not escape as a traceback.
+    from pypdf.generic import ArrayObject, NameObject, NumberObject
+
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=320, height=180)
+    page[NameObject("/UserUnit")] = ArrayObject([NumberObject(1)])
+    writer.write(pdf)
+    with pytest.raises(PackageError, match="spatial project failed"):
+        with load_project(pack_package(pdf, root=tmp_path)):
+            pytest.fail("malformed page admitted")

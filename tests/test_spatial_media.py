@@ -90,3 +90,38 @@ def test_invalid_placements_fail_closed(tmp_path: Path, kind: str) -> None:
     writer.write(path)
     with pytest.raises(PdfMediaError):
         discover_pdf_media_placements(path, {"media/clip.mp4"})
+
+
+def _launch_target(path: Path, target: str) -> None:
+    writer = PdfWriter(clone_from=PdfReader(path))
+    writer.pages[0]["/Annots"][1].get_object()["/A"][NameObject("/F")] = (
+        TextStringObject(target)
+    )
+    writer.write(path)
+
+
+def test_launch_link_tolerates_whitespace_and_empty_options(tmp_path: Path) -> None:
+    # pack strips the target and ignores empty options; spatial must agree.
+    path = tmp_path / "talk.pdf"
+    fixture(path)
+    _launch_target(path, " media/clip.mp4?autostart&loop& ")
+    launch = discover_pdf_media_placements(path, {"media/clip.mp4"})[1]
+    assert launch.asset_path == "media/clip.mp4"
+    assert launch.autostart is True and launch.loop is True
+
+
+def test_media_outside_the_mediabox_vertically_is_rejected(tmp_path: Path) -> None:
+    # A CropBox taller than the MediaBox must not admit media above the page.
+    path = tmp_path / "talk.pdf"
+    fixture(path)
+    writer = PdfWriter(clone_from=PdfReader(path))
+    page = writer.pages[0]
+    page[NameObject("/CropBox")] = ArrayObject(
+        [FloatObject(v) for v in (0, 0, 320, 400)]
+    )
+    page["/Annots"][0].get_object()[NameObject("/Rect")] = ArrayObject(
+        [FloatObject(v) for v in (20, 200, 160, 260)]
+    )
+    writer.write(path)
+    with pytest.raises(PdfMediaError, match="empty visible"):
+        discover_pdf_media_placements(path, {"media/clip.mp4"})

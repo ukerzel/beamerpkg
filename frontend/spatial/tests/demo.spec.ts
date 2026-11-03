@@ -83,3 +83,29 @@ test('backup clusters are off the tour but reachable from finale, views and path
         await stop();
     }
 });
+
+// The overview frames the whole canvas the same way whatever step it is opened from.
+test('overview framing does not depend on the current step', async ({ page }) => {
+    const { endpoint, stop } = await startServer('build/spatial-fixtures/demo.beamerpkg', page);
+    try {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(endpoint);
+        const position = page.getByTestId('position');
+        const world = page.getByTestId('world');
+        await expect(position).toContainText('step 1/15 title', { timeout: 15_000 });
+        await page.getByRole('button', { name: 'Overview', exact: true }).click();
+        await expect(position).toContainText('overview');
+        await expect.poll(() => world.getAttribute('data-zoom')).not.toBeNull();
+        await page.waitForTimeout(200);
+        const fromTitle = await world.getAttribute('data-zoom');
+        // Step 6 is the Higgs close-up, whose viewpoint has zero padding.
+        await page.keyboard.press('Escape');
+        for (let i = 0; i < 20 && !(await position.textContent())?.includes('step 6/15'); i++)
+            await page.keyboard.press('ArrowRight');
+        await expect(position).toContainText('guided step 6/15 higgs');
+        await page.getByRole('button', { name: 'Overview', exact: true }).click();
+        await expect(world).toHaveAttribute('data-zoom', fromTitle!);
+    } finally {
+        await stop();
+    }
+});

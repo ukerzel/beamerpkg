@@ -80,7 +80,8 @@ function Thumbnail({
         let current = true;
         // The renderer clamps the scale to this deck's per-thumbnail pixel budget.
         if (ref.current)
-            renderer.request(id, page, ref.current, 16, [0, 0, 1, 1], () => {
+            // Namespaced: the renderer reserves the key 'detail', a valid object id.
+            renderer.request(`thumb:${id}`, page, ref.current, 16, [0, 0, 1, 1], () => {
                 if (!current) return;
                 setReady(true);
                 onReady();
@@ -127,6 +128,14 @@ function Movie({
     const [rect, setRect] = useState<number[] | null>(null);
     const [shown, setShown] = useState(false);
     const id = `${objectId}:${placement.page_index}:${placement.annotation_index}`;
+    // Re-activate only when a new bookmark arrives. Navigation clears the
+    // bookmark again on the next pan or overlay step, and that must not pause
+    // or rewind a video the presenter has started since.
+    const latest = useRef(restore);
+    latest.current = restore;
+    const bookmark = useRef(restore);
+    if (restore) bookmark.current = restore;
+    const restoreKey = bookmark.current;
     useEffect(() => {
         let current = true;
         void pdf.getPage(placement.page_index + 1).then((p) => {
@@ -138,9 +147,9 @@ function Movie({
     }, [pdf, placement]);
     useEffect(() => {
         if (!selected || !rect || !ref.current) return;
-        controller.activate(id, ref.current, placement, restore);
+        controller.activate(id, ref.current, placement, latest.current);
         return () => controller.deactivate();
-    }, [selected, rect, id, placement, controller, restore]);
+    }, [selected, rect, id, placement, controller, restoreKey]);
     if (!rect) return null;
     const playing = selected && status === 'Playing';
     const startable =
@@ -642,11 +651,11 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
         if (!size.width || size.width <= 1) return;
         const target =
             pendingRestore.current ??
-            fit(
-                state.mode === 'overview' ? worldBox(project) : viewBox(project, view),
-                size,
-                view.padding,
-            );
+            // The overview keeps the default margin; a step's view padding
+            // (e.g. 0 for an edge-to-edge close-up) must not leak into it.
+            (state.mode === 'overview'
+                ? fit(worldBox(project), size)
+                : fit(viewBox(project, view), size, view.padding));
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
         // The first valid size opens on the whole canvas, then flies to step one.
         const intro = opening.current && !reduced;

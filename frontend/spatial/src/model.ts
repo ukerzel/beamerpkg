@@ -116,14 +116,12 @@ export function parseProject(raw: unknown): Project {
         if (result.size !== items.length) fail('duplicate IDs');
         return result;
     }
-    if (JSON.stringify(project.source) !== JSON.stringify(m.source)) {
-        // Compare fields explicitly: JSON key order is not part of the contract.
-        if (
-            project.source.pdf_path !== m.source.pdf_path ||
-            project.source.pdf_sha256 !== m.source.pdf_sha256
-        )
-            fail('PDF binding mismatch');
-    }
+    // Compare fields explicitly: JSON key order is not part of the contract.
+    if (
+        project.source.pdf_path !== m.source.pdf_path ||
+        project.source.pdf_sha256 !== m.source.pdf_sha256
+    )
+        fail('PDF binding mismatch');
     const frames = unique(m.frames),
         objects = unique(m.objects),
         views = unique(m.viewpoints);
