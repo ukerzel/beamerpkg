@@ -10,6 +10,12 @@ Canvas: the title is the hub; the talk's four acts sit around it clockwise
 frames (page transitions, presenter screen) are small satellites off the tour
 but stay on the canvas and in the ``deck`` path, which keeps the original order.
 
+Backup material (the frames after ``\appendix``) lies in a band below the
+main track, away from the tour: each backup part is a tight 2x2 cluster of its
+divider and three frames, so gaps inside a part are much smaller than gaps
+between parts or to the talk. Each part has a world-rectangle viewpoint for
+jumping there during questions, and the ``backup`` path visits them in order.
+
 Usage: python tools/demo_spatial_layout.py examples/demo.beamerpkg
 """
 
@@ -35,7 +41,19 @@ FRAMES: list[tuple[str, list[int]]] = [
     ("inside", [20, 21, 22, 23, 24]),
     ("try", [25]),
 ]
-PAGES = 26
+# Backup parts: (cluster viewpoint, [divider, frame, frame, frame]); after
+# \appendix every backup frame is a single page.
+BACKUP: list[tuple[str, list[str]]] = [
+    ("backup-physics", ["backup-a", "a-potential", "a-expansion", "a-numbers"]),
+    ("backup-container", ["backup-b", "b-manifest", "b-checks", "b-paths"]),
+    ("backup-canvas", ["backup-c", "c-sidecar", "c-flight", "c-budget"]),
+]
+FRAMES += [
+    (name, [26 + 4 * part + i])
+    for part, (_, names) in enumerate(BACKUP)
+    for i, name in enumerate(names)
+]
+PAGES = 38
 
 # Canvas placement (x, y, width) in world units; 16:9 pages, so height = 0.5625 w.
 PLACES: dict[str, tuple[float, float, float]] = {
@@ -51,6 +69,32 @@ PLACES: dict[str, tuple[float, float, float]] = {
     "inside": (80, 780, 960),
     "try": (-1040, 780, 960),
 }
+
+# Backup band: cells smaller than talk frames, packed with a small gap inside
+# a part and a wide one between parts; the band sits well below the talk.
+CELL, CELL_GAP, PART_GAP, BAND_GAP = 560, 28, 360, 560
+
+
+def _backup_places(talk: dict[str, tuple[float, float, float]]) -> dict[str, Any]:
+    """Centre the band under the talk; each part reads divider, then Z order."""
+    bottom = max(y + w * 9 / 16 for _, y, w in talk.values())
+    centre = (
+        min(x for x, _, _ in talk.values()) + max(x + w for x, _, w in talk.values())
+    ) / 2
+    part_width = 2 * CELL + CELL_GAP
+    left = centre - (len(BACKUP) * part_width + (len(BACKUP) - 1) * PART_GAP) / 2
+    return {
+        name: (
+            left + part * (part_width + PART_GAP) + (i % 2) * (CELL + CELL_GAP),
+            bottom + BAND_GAP + (i // 2) * (CELL * 9 / 16 + CELL_GAP),
+            CELL,
+        )
+        for part, (_, names) in enumerate(BACKUP)
+        for i, name in enumerate(names)
+    }
+
+
+PLACES.update(_backup_places(PLACES))
 
 # Detail regions (normalized to the frame) measured from the rendered pages,
 # with fit padding. Equal normalized width/height matches a 16:9 screen; the
@@ -104,6 +148,22 @@ def demo_layout(source: dict[str, str]) -> dict[str, Any]:
         }
         for view, (obj, region, padding) in DETAILS.items()
     ]
+
+    def enclosing(names: list[str]) -> list[float]:
+        x0 = min(boxes[n][0] for n in names)
+        y0 = min(boxes[n][1] for n in names)
+        x1 = max(boxes[n][0] + boxes[n][2] for n in names)
+        y1 = max(boxes[n][1] + boxes[n][3] for n in names)
+        return [x0, y0, x1 - x0, y1 - y0]
+
+    band = [n for _, names in BACKUP for n in names]
+    viewpoints.append(
+        {"id": "backup", "target": {"kind": "world_rect", "rect": enclosing(band)}}
+    )
+    viewpoints += [
+        {"id": view, "target": {"kind": "world_rect", "rect": enclosing(names)}}
+        for view, names in BACKUP
+    ]
     viewpoints.append(
         {
             "id": "canvas",
@@ -116,7 +176,7 @@ def demo_layout(source: dict[str, str]) -> dict[str, Any]:
 
     def step(step_id: str, view: str, overlay: int | None) -> dict[str, Any]:
         if overlay is None:
-            fixed = view == "canvas"
+            fixed = view == "canvas" or view.startswith("backup")
             return {
                 "id": step_id,
                 "viewpoint_id": view,
@@ -146,6 +206,18 @@ def demo_layout(source: dict[str, str]) -> dict[str, Any]:
             {
                 "id": "deck",
                 "steps": [step(f"slide-{name}", name, None) for name, _ in FRAMES],
+            },
+            {
+                "id": "backup",
+                "steps": [step("backup", "backup", None)]
+                + [
+                    step(f"{kind}-{name}", name, None)
+                    for view, names in BACKUP
+                    for kind, name in [
+                        ("part", view),
+                        *(("slide", n) for n in names[1:]),
+                    ]
+                ],
             },
         ],
         "media_overrides": [],

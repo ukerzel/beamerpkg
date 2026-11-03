@@ -356,17 +356,51 @@ function Minimap({
     );
 }
 
-/** Crops a viewpoint preview from the already rendered object thumbnail; no
- * additional PDF rendering happens for previews. */
-function ViewPreview({ view, version }: { view: View; version: number }) {
+/** Draws a viewpoint preview from the already rendered object thumbnails: a
+ * crop of one frame, or a miniature of a canvas region with every frame in it.
+ * No additional PDF rendering happens for previews. */
+function ViewPreview({
+    project,
+    view,
+    version,
+}: {
+    project: Project;
+    view: View;
+    version: number;
+}) {
     const ref = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         const canvas = ref.current,
             t = view.target;
-        if (!canvas || t.kind !== 'object') return;
-        const source = document.querySelector<HTMLCanvasElement>(
-            `canvas.thumbnail[data-object="${CSS.escape(t.object_id)}"]`,
-        );
+        if (!canvas) return;
+        const thumbnail = (id: string) =>
+            document.querySelector<HTMLCanvasElement>(
+                `canvas.thumbnail[data-object="${CSS.escape(id)}"]`,
+            );
+        const g = canvas.getContext('2d')!;
+        g.clearRect(0, 0, canvas.width, canvas.height);
+        g.imageSmoothingQuality = 'high';
+        if (t.kind === 'world_rect') {
+            const [x, y, w, h] = t.rect,
+                scale = Math.min(canvas.width / w, canvas.height / h),
+                ox = (canvas.width - w * scale) / 2,
+                oy = (canvas.height - h * scale) / 2;
+            for (const obj of project.layout.objects) {
+                const [bx, by, bw, bh] = objectBox(project, obj),
+                    source = thumbnail(obj.id);
+                if (!source || source.width <= 1) continue;
+                if (bx >= x + w || by >= y + h || bx + bw <= x || by + bh <= y) continue;
+                g.drawImage(
+                    source,
+                    ox + (bx - x) * scale,
+                    oy + (by - y) * scale,
+                    bw * scale,
+                    bh * scale,
+                );
+            }
+            return;
+        }
+        const source = thumbnail(t.object_id);
         if (!source || source.width <= 1) return;
         const [rx, ry, rw, rh] = t.region,
             sw = source.width * rw,
@@ -374,9 +408,6 @@ function ViewPreview({ view, version }: { view: View; version: number }) {
         const scale = Math.min(canvas.width / sw, canvas.height / sh),
             w = sw * scale,
             h = sh * scale;
-        const g = canvas.getContext('2d')!;
-        g.clearRect(0, 0, canvas.width, canvas.height);
-        g.imageSmoothingQuality = 'high';
         g.drawImage(
             source,
             source.width * rx,
@@ -388,12 +419,8 @@ function ViewPreview({ view, version }: { view: View; version: number }) {
             w,
             h,
         );
-    }, [view, version]);
-    return view.target.kind === 'object' ? (
-        <canvas ref={ref} width={192} height={108} />
-    ) : (
-        <span className="schematic" />
-    );
+    }, [project, view, version]);
+    return <canvas ref={ref} width={192} height={108} />;
 }
 
 function ViewsDrawer({
@@ -436,7 +463,7 @@ function ViewsDrawer({
                         >
                             <span className="preview">
                                 {i < 48 ? (
-                                    <ViewPreview view={v} version={version} />
+                                    <ViewPreview project={project} view={v} version={version} />
                                 ) : (
                                     <span className="schematic" />
                                 )}
@@ -540,6 +567,7 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
     const drag = useRef<{ x: number; y: number; moved: boolean; object?: string } | null>(null);
     const stateRef = useRef(state);
     stateRef.current = state;
+    const canvasViewRef = useRef(false);
     const view = project.layout.viewpoints.find((v) => v.id === state.viewId)!;
     const activeObject =
         state.mode !== 'overview' && view.target.kind === 'object'
@@ -856,6 +884,11 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
     const quiet = idle && state.mode === 'guided' && !viewsOpen && !help;
     const showMinimap = minimapPref ?? state.mode !== 'guided';
     const anchorStep = state.anchor ? state.anchor.step + 1 : null;
+    // With no single frame in focus (overview, or a guided whole-canvas step such
+    // as a finale), the route is shown and a click on a frame flies into it.
+    const canvasView = !activeObject;
+    canvasViewRef.current = canvasView;
+    const lastStep = state.step === path.steps.length - 1;
     const segmented = path.steps.length <= 24;
     return (
         <div className={`app${quiet ? ' quiet' : ''}`}>
@@ -866,7 +899,7 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                 <div className="viewport">
                     <div
                         ref={stage}
-                        className={`stage mode-${state.mode}${dragging ? ' dragging' : ''}`}
+                        className={`stage mode-${state.mode}${canvasView ? ' canvas' : ''}${dragging ? ' dragging' : ''}`}
                         tabIndex={0}
                         aria-label="Presentation canvas"
                         style={gridStyle(camera, size)}
@@ -910,8 +943,8 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                             const d = drag.current;
                             drag.current = null;
                             setDragging(false);
-                            // In the overview, a plain click on a frame flies into it.
-                            if (d && !d.moved && d.object && stateRef.current.mode === 'overview')
+                            // On a whole-canvas view, a plain click on a frame flies into it.
+                            if (d && !d.moved && d.object && canvasViewRef.current)
                                 focusObject(d.object);
                         }}
                         onPointerCancel={() => {
@@ -1049,7 +1082,7 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                         camera={camera}
                         size={size}
                         current={state.anchor?.step ?? state.step}
-                        visible={state.mode === 'overview'}
+                        visible={canvasView}
                         jump={(index) => act('step', String(index))}
                     />
                     <div className="hud" data-testid="position">
@@ -1068,9 +1101,14 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                             </>
                         ) : null}
                     </div>
-                    {state.mode !== 'guided' && (
+                    {(state.mode !== 'guided' || canvasView) && (
                         <div className="detour">
-                            {state.mode === 'overview' ? (
+                            {state.mode === 'guided' ? (
+                                <span>
+                                    {lastStep ? 'End of tour · ' : ''}Click a number to jump · a
+                                    frame to look closer
+                                </span>
+                            ) : state.mode === 'overview' ? (
                                 <span>Click a number to jump · a frame to look closer</span>
                             ) : (
                                 <span>
@@ -1082,6 +1120,8 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                                 <button onClick={() => act('next')}>Resume</button>
                             ) : state.history.length ? (
                                 <button onClick={() => act('escape')}>Back</button>
+                            ) : state.mode === 'guided' && lastStep ? (
+                                <button onClick={() => act('step', '0')}>Start over</button>
                             ) : null}
                         </div>
                     )}

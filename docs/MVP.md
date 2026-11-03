@@ -143,3 +143,15 @@ during `build_demo.sh` and bound to that build's PDF hash. The deck's wording
 names both routes (title subtitle, an added `spatial` command on "Try it"). Its
 page count and overlay structure are unchanged, so the pdfpc route, notes and
 sidecar behave as before. The science fixture remains the automated test input.
+
+### Backup material in the demo talk (2026-11-03)
+
+Requirement: talks usually carry backup frames for questions, and on the
+spatial route these should sit apart from the main track, grouped visibly by
+topic. Response: `demo.tex` gains three backup parts after `\appendix`
+(appendixnumberbeamer and pdfpc `enduserslide=11` keep the main talk's frame
+count and progress unchanged). The generated layout places each part as a tight
+cluster in a band below the talk, adds a world-rectangle viewpoint per part
+and a `backup` path. No schema change is involved: the clusters come from
+placement alone. The viewer only gains miniature previews of canvas-region
+viewpoints, drawn from the existing thumbnails.

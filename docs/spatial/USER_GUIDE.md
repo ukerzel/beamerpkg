@@ -37,7 +37,18 @@ into the Higgs potential, where the next steps drop the ball into the vacuum
 in place. It then zooms into the click-to-play video and ends on the whole
 canvas. The pdfpc-specific frames (page transitions, presenter screen) are
 small satellites off the tour. The `deck` path in the dock's path menu plays
-all eleven frames in their original order.
+every frame in its original order, backup included.
+
+Backup material follows the talk after `\appendix`: three parts (A physics,
+B container, C spatial internals), each a dark divider with the part letter
+plus three frames. On the canvas they form a band below the talk, one tight
+2×2 cluster per part. Frames within a part almost touch, while parts sit far
+apart from each other and from the talk. The tour never enters them but its
+finale shows them, and a click flies into any backup frame. For questions, open
+**Views** and pick `backup-physics`, `backup-container` or `backup-canvas` (the
+drawer shows each cluster as a miniature), or switch to the `backup` path. In
+pdfpc the backup frames come after "Try it": the frame counter and progress bar
+cover the talk only, and the footline labels the frames A.1, A.2, …
 
 ## Build and try the teaching fixture
 
@@ -70,7 +81,8 @@ removes extracted files. Only the local loopback endpoint is served.
   PgUp/PgDn). A fixed-overlay detail step is one path step.
 - Overview or O shows the whole canvas with the guided route and numbered
   stops; clicking a number jumps to that step (discarding detours), clicking a
-  frame flies into it as a detour. Views (V) opens previews of every
+  frame flies into it as a detour. The same applies on a guided whole-canvas
+  step, such as the demo's finale, which also offers Start over. Views (V) opens previews of every
   whole-frame/detail target for a temporary detour. Double-click a frame to
   focus it. M toggles the minimap, F fullscreen, ? the shortcut sheet.
 - Camera moves zoom out, travel and zoom back in (smooth zoom/pan path). While

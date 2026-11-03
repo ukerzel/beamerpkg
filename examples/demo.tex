@@ -10,9 +10,13 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,shapes.misc}
 \usepackage{beamerpkg}
+% Backup frames after \appendix keep "n / total" counting the main talk only.
+\usepackage{appendixnumberbeamer}
 % Speaker notes are embedded in the PDF as hidden annotations; pdfpc shows
-% them on the presenter screen. duration= drives pdfpc's countdown timer.
-\usepackage[duration=10,lastminutes=2]{pdfpc}
+% them on the presenter screen. duration= drives pdfpc's countdown timer;
+% enduserslide= marks "Try it" (frame 11) as the end of the talk proper, so the
+% backup frames after it do not count towards pdfpc's progress.
+\usepackage[duration=10,lastminutes=2,enduserslide=11]{pdfpc}
 
 % ---------------------------------------------------------------------------
 % Palette (taken from the demo video poster)
@@ -117,6 +121,48 @@
   {\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{1pt}\fcolorbox{#1}{black}{#2}}%
 }
 \newcommand{\chiptag}[2][amber]{\tikz[baseline=(t.base)]\node[chip,fill=#1!18,text=#1!60!black](t){#2};}
+
+% ---------------------------------------------------------------------------
+% Backup parts: \backuppart{letter}{title}{accent colour} before each divider.
+% The footline names the part and numbers its frames A.1, A.2, ...
+% ---------------------------------------------------------------------------
+\newcommand{\bkletter}{}\newcommand{\bktitle}{}\newcommand{\bkcolor}{amber}
+\newcount\bkstart
+\newcommand{\backuppart}[3]{%
+  \gdef\bkletter{#1}\gdef\bktitle{#2}\gdef\bkcolor{#3}%
+  \global\bkstart=\value{framenumber}}
+\newcommand{\backupfootline}{%
+  \setbeamertemplate{footline}{%
+    \begin{tikzpicture}
+      \useasboundingbox (0,0) rectangle (\paperwidth,8mm);
+      \node[anchor=west,font=\tiny,text=muted] at (10mm,4mm)
+        {backup \textperiodcentered{} \textbf{\color{\bkcolor!75!black}\bkletter}\enspace\bktitle};
+      \node[anchor=east,font=\tiny\bfseries,text=\bkcolor!75!black] at ($(\paperwidth,4mm)-(10mm,0)$)
+        {\bkletter.\the\numexpr\value{framenumber}-\bkstart-1\relax};
+      \fill[\bkcolor] (0,0) rectangle (\paperwidth,0.8pt);
+    \end{tikzpicture}%
+  }%
+}
+% Divider: big part letter plus the three frame titles of the part.
+\newcommand{\backupdivider}[3]{% #1 subtitle, #2 contents list, #3 note
+  {\nightmode
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=east,font=\fontsize{150}{150}\selectfont\bfseries,text=\bkcolor,opacity=0.9]
+        at ($(current page.east)+(-12mm,1mm)$) {\bkletter};
+    \end{tikzpicture}
+    \vfill
+    {\scriptsize\bfseries\color{\bkcolor}BACKUP\enspace\bkletter\par}
+    \vskip3mm
+    {\fontsize{24}{28}\selectfont\bfseries\bktitle\par}
+    \vskip2mm
+    {\small\color{white!70}#1\par}
+    \vskip7mm
+    {\footnotesize\color{white!85}#2\par}
+    \vfill
+    \pdfpcnote{#3}
+  \end{frame}}%
+}
 
 \title{One file. Every slide. Every video.}
 \subtitle{Portable multimedia Beamer talks, for pdfpc or a spatial canvas}
@@ -478,6 +524,300 @@
   \chiptag[amber]{ship one file}\quad
   \chiptag[violet]{present your way}
   \pdfpcnote{Build, inspect, present - with pdfpc or spatially, from the same archive.\\Questions?}
+\end{frame}
+
+% ===========================================================================
+% Backup material: three parts, each a divider and three frames. Not part of
+% the talk proper; in the spatial layout every part is its own tight cluster.
+% ===========================================================================
+\appendix
+\backupfootline
+
+% ---------------------------------------------------------------------------
+\backuppart{A}{The physics in the hat}{amber}
+\backupdivider{The Higgs potential from \emph{Beamer stays Beamer}, worked out}
+  {\textbf{A.1}\enspace The potential along one direction\\[1mm]
+   \textbf{A.2}\enspace Expanding around the vacuum\\[1mm]
+   \textbf{A.3}\enspace The numbers}
+  {Backup A: the physics behind the Mexican-hat plot, for questions from physicists.}
+
+\begin{frame}{The potential along one direction}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.55\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+            width=\columnwidth, height=0.72\columnwidth,
+            axis lines=middle, axis line style={muted,-{Stealth[length=1.6mm]}},
+            xmin=-1.25, xmax=1.25, ymin=-0.05, ymax=0.45,
+            xtick={-0.7071,0,0.7071}, xticklabels={$-\frac{v}{\sqrt2}$,,$\frac{v}{\sqrt2}$},
+            ytick=\empty, tick label style={font=\scriptsize,text=muted},
+            xlabel={$\phi$}, ylabel={$V$},
+            xlabel style={font=\small,anchor=west}, ylabel style={font=\small,anchor=south},
+            clip=false,
+          ]
+          \addplot[domain=-1.06:1.06, samples=121, line width=1.4pt, color=navy]
+            {(x^2-0.5)^2};
+          \addplot[only marks, mark=ball, ball color=white, mark size=2.6pt]
+            coordinates {(0,0.25)};
+          \addplot[only marks, mark=ball, ball color=amber, mark size=2.6pt]
+            coordinates {(0.7071,0) (-0.7071,0)};
+          \node[font=\scriptsize,text=muted,anchor=south] at (axis cs:0,0.28) {symmetric, unstable};
+          \node[font=\scriptsize,text=amber!80!black,anchor=west] at (axis cs:0.96,0.07)
+            {vacuum};
+        \end{axis}
+      \end{tikzpicture}
+    \column{0.41\textwidth}
+      \small
+      \[ V(\phi) = -\mu^2 \lvert\phi\rvert^2 + \lambda \lvert\phi\rvert^4 \]
+      \vskip-1mm
+      With $\mu^2 > 0$ the origin is a maximum. The minimum sits on a circle:
+      \[ \lvert\phi\rvert^2 = \frac{\mu^2}{2\lambda} \equiv \frac{v^2}{2} \]
+      \vskip-1mm
+      {\footnotesize\color{muted}A cut through the surface on the main slide;
+        $V = \lambda\bigl(\lvert\phi\rvert^2 - \tfrac{v^2}{2}\bigr)^2$ up to a constant.\par}
+  \end{columns}
+  \pdfpcnote{The 3D surface is rotationally symmetric; this is one cut through it.}
+\end{frame}
+
+\begin{frame}{Expanding around the vacuum}
+  \small
+  In unitary gauge the doublet is a single real field $h$ around the vacuum:
+  \[ \phi = \frac{1}{\sqrt2}\begin{pmatrix} 0 \\ v + h \end{pmatrix}
+     \qquad\Longrightarrow\qquad
+     V = \lambda v^2 h^2 + \lambda v\, h^3 + \frac{\lambda}{4}\, h^4 \]
+  \vskip1mm
+  \begin{columns}[T,onlytextwidth]
+    \column{0.31\textwidth}
+      \begin{block}{$h^2$: mass}
+        \centering $\tfrac12 m_H^2 = \lambda v^2$
+      \end{block}
+    \column{0.31\textwidth}
+      \begin{block}{$h^3$: trilinear}
+        \centering $\lambda v = \dfrac{m_H^2}{2v}$
+      \end{block}
+    \column{0.31\textwidth}
+      \begin{block}{$h^4$: quartic}
+        \centering $\dfrac{\lambda}{4} = \dfrac{m_H^2}{8v^2}$
+      \end{block}
+  \end{columns}
+  \vskip4mm
+  \centering
+  \tikz\node[rounded corners=1.5mm,fill=amber!15,inner sep=2.5mm,font=\normalsize]
+    {$m_H = \sqrt{2\lambda}\, v$\quad{\small\color{muted}one free parameter fixes all three}};
+  \pdfpcnote{Measuring the self-couplings tests the shape of the potential, not just its minimum.}
+\end{frame}
+
+\begin{frame}{The numbers}
+  \centering
+  \vskip2mm
+  \begin{tikzpicture}[
+      num/.style={card,minimum width=33mm,minimum height=22mm,align=center},
+    ]
+    \node[num] (v) at (0,0)
+      {\scriptsize\color{muted}vacuum expectation value\\[1mm]
+       {\Large\bfseries $v \approx 246$\,GeV}\\[0.5mm]
+       \scriptsize $v = (\sqrt2\, G_F)^{-1/2}$};
+    \node[num,draw=amber,line width=1pt] (mh) at (37mm,0)
+      {\scriptsize\color{muted}Higgs mass (measured)\\[1mm]
+       {\Large\bfseries $m_H \approx 125$\,GeV}\\[0.5mm]
+       \scriptsize ATLAS \& CMS, 2012};
+    \node[num] (lam) at (74mm,0)
+      {\scriptsize\color{muted}self-coupling\\[1mm]
+       {\Large\bfseries $\lambda \approx 0.13$}\\[0.5mm]
+       \scriptsize $\lambda = m_H^2 / 2v^2$};
+    \node[num,minimum width=40mm] (w) at (14mm,-25mm)
+      {\scriptsize\color{muted}$W$ boson\\[1mm]
+       {\normalsize\bfseries $m_W = \tfrac12 g\, v \approx 80$\,GeV}};
+    \node[num,minimum width=50mm] (z) at (62mm,-25mm)
+      {\scriptsize\color{muted}$Z$ boson\\[1mm]
+       {\normalsize\bfseries $m_Z = \tfrac12 \sqrt{g^2 + g'^2}\, v \approx 91$\,GeV}};
+  \end{tikzpicture}
+  \vskip3mm
+  {\scriptsize\color{muted}The same $v$ gives the top quark a Yukawa coupling
+    $y_t = \sqrt2\, m_t / v \approx 1$.\par}
+  \pdfpcnote{G_F from muon decay fixes v; the Higgs mass then fixes lambda.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\backuppart{B}{Container details}{sky}
+\backupdivider{What is inside a \texttt{.beamerpkg}, and what it refuses}
+  {\textbf{B.1}\enspace The manifest\\[1mm]
+   \textbf{B.2}\enspace What is checked before presenting\\[1mm]
+   \textbf{B.3}\enspace Paths that are refused}
+  {Backup B: the container format, for questions about robustness and security.}
+
+\begin{frame}{The manifest}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.56\textwidth}
+      \begin{tikzpicture}
+        \node[rounded corners=2mm,fill=navy,inner sep=3mm,text width=0.92\columnwidth,
+              font=\ttfamily\scriptsize,text=white,align=left]
+          {\{\\
+           \ \ "schema\_version": \color{amber}1\color{white},\\
+           \ \ "presentation": \{\\
+           \ \ \ \ "path": \color{sky}"demo.pdf"\color{white},\\
+           \ \ \ \ "size": \color{amber}7929069\color{white},\\
+           \ \ \ \ "sha256": \color{sky}"f2e46f23\ldots"\color{white}\ \},\\
+           \ \ "notes": \{ "path": \color{sky}"demo.pdfpc"\color{white}, \ldots\ \},\\
+           \ \ "assets": [\\
+           \ \ \ \ \{ "path": \color{sky}"media/\ldots.mp4"\color{white}, \ldots\ \}\ ],\\
+           \ \ "source": \{ "root": \color{sky}"source"\color{white}, "files": [\ldots] \}\\
+           \}};
+      \end{tikzpicture}
+    \column{0.4\textwidth}
+      \small
+      \begin{itemize}
+        \item every file has a byte size and a SHA-256
+        \item media keep the relative path the PDF uses
+        \item notes and \LaTeX{} sources are optional
+        \item nothing else may be in the ZIP
+      \end{itemize}
+  \end{columns}
+  \pdfpcnote{The manifest of this very talk, shortened.}
+\end{frame}
+
+\begin{frame}{What is checked before presenting}
+  \centering
+  \vskip4mm
+  \begin{tikzpicture}[
+      st/.style={card,minimum width=27mm,minimum height=15mm,align=center,font=\scriptsize,
+        text width=25mm},
+    ]
+    \node[st] (zip) {\textbf{ZIP}\\unique member names};
+    \node[st,right=5mm of zip] (man) {\textbf{manifest}\\JSON object, schema~1};
+    \node[st,right=5mm of man] (hash) {\textbf{every file}\\present, size, SHA-256};
+    \node[st,right=5mm of hash] (pdf) {\textbf{presentation}\\starts with \texttt{\%PDF-}};
+    \node[st,below=9mm of zip] (ext) {\textbf{extract}\\no symlinks, no escapes};
+    \node[st,right=5mm of ext,fill=navy,draw=navy,text=white] (run) {\textbf{pdfpc}\\runs in a temp dir};
+    \node[st,right=5mm of run] (rm) {\textbf{cleanup}\\temp dir removed};
+    \foreach \a/\b in {zip/man,man/hash,hash/pdf,ext/run,run/rm} \draw[flow] (\a) -- (\b);
+    \draw[flow] (pdf.south) |- ($(pdf.south)!0.5!(rm.north)$) -| (ext.north);
+  \end{tikzpicture}
+  \vskip6mm
+  {\small Undeclared files are an error too: what is shown is exactly what was packed.\par}
+  \pdfpcnote{Any failure stops before pdfpc starts, with a message naming the file.}
+\end{frame}
+
+\begin{frame}{Paths that are refused}
+  \centering
+  \vskip2mm
+  \renewcommand{\arraystretch}{1.25}
+  \small
+  \begin{tabular}{@{}l l@{}}
+    \color{sky!70!black}\textbf{\checkmark}\enspace\texttt{media/simulation.mp4}
+      & clean relative path \\
+    \color{danger}\textbf{\texttimes}\enspace\texttt{/home/me/simulation.mp4}
+      & {\color{muted}absolute} \\
+    \color{danger}\textbf{\texttimes}\enspace\texttt{../media/simulation.mp4}
+      & {\color{muted}escapes the project root} \\
+    \color{danger}\textbf{\texttimes}\enspace\texttt{./media/simulation.mp4}
+      & {\color{muted}not normalised} \\
+    \color{danger}\textbf{\texttimes}\enspace\texttt{C:/talk/simulation.mp4}
+      & {\color{muted}drive prefix} \\
+    \color{danger}\textbf{\texttimes}\enspace\texttt{https://example.org/sim.mp4}
+      & {\color{muted}remote media are not bundled} \\
+    \color{danger}\textbf{\texttimes}\enspace symlinks
+      & {\color{muted}in sources and in the ZIP} \\
+  \end{tabular}
+  \pdfpcnote{Fail closed: packing and extraction refuse anything that could land outside its directory.}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+\backuppart{C}{Under the spatial canvas}{violet}
+\backupdivider{How \texttt{beamerpkg spatial} places, flies and renders}
+  {\textbf{C.1}\enspace The layout sidecar\\[1mm]
+   \textbf{C.2}\enspace Smooth zoom and pan\\[1mm]
+   \textbf{C.3}\enspace Rendering within a memory budget}
+  {Backup C: how the spatial route works, for questions about the canvas.}
+
+\begin{frame}{The layout sidecar}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.5\textwidth}
+      \begin{tikzpicture}
+        \node[rounded corners=2mm,fill=navy,inner sep=3mm,text width=0.92\columnwidth,
+              font=\ttfamily\scriptsize,text=white,align=left]
+          {\color{white!50}demo.spatial.json\color{white}\\[1mm]
+           "source": \{ "pdf\_sha256": \color{sky}"f2e4\ldots"\color{white} \},\\
+           "frames": [ \{ "id": \color{sky}"f-beamer"\color{white},\\
+           \ \ "page\_indices": [\color{amber}8, 9, 10, 11, 12\color{white}] \} ],\\
+           "objects": [ \{ "id": \color{sky}"beamer"\color{white},\\
+           \ \ "x": \color{amber}-640\color{white}, "y": \color{amber}-1400\color{white},
+             "width": \color{amber}1280\color{white} \} ],\\
+           "viewpoints": [ \ldots ],\ "paths": [ \ldots ]};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \small
+      \begin{description}[objects]
+        \item[frames] consecutive PDF pages: one Beamer frame
+        \item[objects] where a frame sits on the canvas
+        \item[viewpoints] a region of a frame, or of the canvas
+        \item[paths] ordered steps, with fixed or all overlays
+      \end{description}
+      \vskip2mm
+      {\footnotesize\color{muted}Read-only, beside the archive, bound to the PDF bytes.
+        The archive itself is unchanged.\par}
+  \end{columns}
+  \pdfpcnote{A rebuilt PDF gets a new hash, so its layout must be regenerated.}
+\end{frame}
+
+\begin{frame}{Smooth zoom and pan}
+  \begin{columns}[c,onlytextwidth]
+    \column{0.52\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+            width=\columnwidth, height=0.74\columnwidth,
+            axis lines=left, axis line style={muted},
+            xmin=0, xmax=6.2, ymin=0, ymax=6.8,
+            xtick={0,6}, xticklabels={start,target}, ytick={1},
+            tick label style={font=\scriptsize,text=muted},
+            xlabel={\scriptsize pan $u$}, ylabel={\scriptsize visible width $w$},
+            xlabel style={text=muted}, ylabel style={text=muted},
+          ]
+          \addplot[domain=0:6, samples=2, dashed, color=muted] {1};
+          \addplot[domain=0:3.524, samples=90, line width=1.4pt, color=violet]
+            ({0.5*(6.083*tanh(1.41421*x-2.4918)+6.0)}, {6.083/cosh(1.41421*x-2.4918)});
+          \node[font=\scriptsize,text=violet!80!black,anchor=south] at (axis cs:3,6.1)
+            {zoom out, travel, zoom in};
+          \node[font=\scriptsize,text=muted,anchor=north] at (axis cs:3,0.95) {straight pan};
+        \end{axis}
+      \end{tikzpicture}
+    \column{0.44\textwidth}
+      \small
+      Optimal path of van Wijk \& Nuij (2003), with $\rho = \sqrt2$:
+      \[ w(s) = w_0\,\frac{\cosh r_0}{\cosh(\rho s + r_0)} \]
+      \vskip-1mm
+      Far jumps zoom out first, so the audience keeps its bearings.
+      \vskip2mm
+      {\footnotesize\color{muted}Duration follows the path length $S$, clamped to
+        0.38--1.5\,s, with cubic easing.\par}
+  \end{columns}
+  \pdfpcnote{J. J. van Wijk and W. A. A. Nuij, Smooth and efficient zooming and panning, IEEE InfoVis 2003.}
+\end{frame}
+
+\begin{frame}{Rendering within a memory budget}
+  \small
+  Slides are rendered by PDF.js from the unchanged PDF. Canvas pixels are capped:
+  \vskip5mm
+  \centering
+  \begin{tikzpicture}[x=1mm,y=1mm,seg/.style={minimum height=10mm,anchor=west,inner sep=0,
+      font=\scriptsize\bfseries,align=center}]
+    % 128 MiB -> 128 mm; RGBA, 4 bytes per pixel.
+    \node[seg,fill=violet,text=white,minimum width=70.6mm] at (0,0) {thumbnails\\18.5\,Mpx};
+    \node[seg,fill=sky,text=navy,minimum width=45.8mm] at (70.6,0) {detail 3$\times$4\,Mpx};
+    \node[seg,fill=amber,minimum width=3.8mm] at (116.4,0) {};
+    \draw[muted,dashed] (128,-7) -- (128,7) node[above,font=\scriptsize] {128\,MiB};
+    \node[font=\scriptsize,text=muted,anchor=north] at (118.3,-6) {previews};
+  \end{tikzpicture}
+  \vskip7mm
+  \begin{columns}[T,onlytextwidth]
+    \column{0.31\textwidth}\footnotesize
+      \textbf{Thumbnails}\\ every frame, sharing one budget, at most 1\,Mpx each
+    \column{0.31\textwidth}\footnotesize
+      \textbf{Detail}\\ the frame in view, sharp; one buffer for its replacement, one to crossfade
+    \column{0.31\textwidth}\footnotesize
+      \textbf{Previews}\\ cropped from thumbnails: no extra PDF rendering
+  \end{columns}
+  \pdfpcnote{About 120 MiB of RGBA in the worst case, independent of the number of frames.}
 \end{frame}
 
 \end{document}
