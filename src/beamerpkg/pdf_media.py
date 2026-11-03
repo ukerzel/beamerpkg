@@ -68,34 +68,39 @@ def discover_pdf_media_references(pdf: Path) -> tuple[str, ...]:
     references: list[str] = []
     seen: set[str] = set()
 
-    for page in reader.pages:
-        annotations = _resolve(page.get("/Annots")) or []
-        for annotation_ref in annotations:
-            annotation = _resolve(annotation_ref)
-            if not isinstance(annotation, dict):
-                continue
+    try:
+        for page in reader.pages:
+            annotations = _resolve(page.get("/Annots")) or []
+            for annotation_ref in annotations:
+                annotation = _resolve(annotation_ref)
+                if not isinstance(annotation, dict):
+                    continue
 
-            reference: str | None = None
-            subtype = annotation.get("/Subtype")
+                reference: str | None = None
+                subtype = annotation.get("/Subtype")
 
-            if subtype == "/Movie":
-                movie = _resolve(annotation.get("/Movie"))
-                if isinstance(movie, dict):
-                    reference = _file_spec_text(movie.get("/F"))
-            elif subtype == "/Link":
-                action = _resolve(annotation.get("/A"))
-                if isinstance(action, dict) and action.get("/S") == "/Launch":
-                    raw = _file_spec_text(action.get("/F"))
-                    if raw is not None:
-                        reference = _pdfpc_launch_media_reference(raw)
+                if subtype == "/Movie":
+                    movie = _resolve(annotation.get("/Movie"))
+                    if isinstance(movie, dict):
+                        reference = _file_spec_text(movie.get("/F"))
+                elif subtype == "/Link":
+                    action = _resolve(annotation.get("/A"))
+                    if isinstance(action, dict) and action.get("/S") == "/Launch":
+                        raw = _file_spec_text(action.get("/F"))
+                        if raw is not None:
+                            reference = _pdfpc_launch_media_reference(raw)
 
-            if reference is None:
-                continue
+                if reference is None:
+                    continue
 
-            key = reference.strip()
-            if key and key not in seen:
-                seen.add(key)
-                references.append(key)
+                key = reference.strip()
+                if key and key not in seen:
+                    seen.add(key)
+                    references.append(key)
+    except Exception as exc:
+        raise PdfMediaError(
+            f"failed to read PDF annotations from {pdf}: {exc}"
+        ) from exc
 
     return tuple(references)
 
@@ -115,17 +120,19 @@ class MediaPlacement:
 
 
 def _placement_path(raw: str, allowed: set[str]) -> str:
-    path = raw.replace("\\", "/")
-    parts = path.split("/")
+    # Match pack's harmless relative-path normalization. The PDF keeps its
+    # original reference; both routes restore the same canonical asset path.
+    path = raw.strip().replace("\\", "/")
+    relative = PurePosixPath(path)
     if (
-        not path
-        or path != path.strip()
-        or PurePosixPath(path).is_absolute()
+        not relative.parts
+        or relative.is_absolute()
         or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path)
-        or any(part in ("", ".", "..") for part in parts)
+        or ".." in relative.parts
         or any(ord(c) < 32 for c in path)
     ):
         raise PdfMediaError("unsafe spatial media path")
+    path = relative.as_posix()
     if path not in allowed:
         raise PdfMediaError("spatial media path is absent from validated manifest")
     return path
@@ -172,7 +179,11 @@ def discover_pdf_media_placements(
                         if value is not None:
                             if not isinstance(value, (bool, BooleanObject)):
                                 raise PdfMediaError("invalid movie controls option")
-                            controls = bool(value)
+                            controls = (
+                                value.value
+                                if isinstance(value, BooleanObject)
+                                else value
+                            )
                 elif (
                     annotation.get("/Subtype") == "/Link"
                     and isinstance(action, dict)

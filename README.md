@@ -208,6 +208,9 @@ manifest and restores it beside `talk.pdf` before launching pdfpc. This keeps
 speaker notes and other pdfpc presentation metadata portable without putting
 them into the PDF itself.
 
+Use `--notes path/to/selected-notes.json` to select another notes file. Its bytes
+are restored as `talk.pdfpc`, matching the presentation name so pdfpc can find it.
+
 The repository demo contains `examples/demo.pdfpc` with a visible speaker note
 on the first page so this behavior can be checked in presenter view.
 

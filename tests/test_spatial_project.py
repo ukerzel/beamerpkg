@@ -110,3 +110,120 @@ def test_malformed_page_values_fail_as_package_errors(tmp_path: Path) -> None:
     with pytest.raises(PackageError, match="spatial project failed"):
         with load_project(pack_package(pdf, root=tmp_path)):
             pytest.fail("malformed page admitted")
+
+
+@pytest.mark.parametrize("name", ["./file", "../outside", "/absolute"])
+def test_archive_admission_rejects_noncanonical_or_escaping_members(
+    tmp_path: Path, name: str
+) -> None:
+    path = tmp_path / "bad.beamerpkg"
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr(name, b"bytes")
+    with pytest.raises(PackageError, match="path"):
+        with admitted_archive(path):
+            pytest.fail("unsafe archive admitted")
+
+
+def test_invalid_archive_and_missing_package_have_controlled_admission_errors(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "bad.beamerpkg"
+    for payload in (None, b"not a ZIP"):
+        if payload is not None:
+            path.write_bytes(payload)
+        with pytest.raises(PackageError, match="admission failed"):
+            with admitted_archive(path):
+                pytest.fail("invalid archive admitted")
+
+
+def test_archive_growth_during_copy_is_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = bundle(tmp_path)
+    limits = replace(Limits(), archive_bytes=original.stat().st_size)
+    open_file = Path.open
+
+    def grow_before_open(path, *args, **kwargs):
+        if path == original and args == ("rb",):
+            with open_file(path, "ab") as stream:
+                stream.write(b"extra")
+        return open_file(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", grow_before_open)
+    with pytest.raises(PackageError, match="archive byte limit"):
+        with admitted_archive(original, limits):
+            pytest.fail("growing archive admitted")
+
+
+@pytest.mark.parametrize("kind", ["oversized", "utf8", "json", "directory"])
+def test_invalid_sidecars_fail_without_leaking_extracted_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    import tempfile
+
+    temp_root = tmp_path / "private-temp"
+    temp_root.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(temp_root))
+    original = bundle(tmp_path)
+    sidecar = original.with_suffix(".spatial.json")
+    if kind == "directory":
+        sidecar.mkdir()
+    else:
+        sidecar.write_bytes(
+            {"oversized": b" " * 33, "utf8": b"\xff", "json": b"not JSON"}[kind]
+        )
+    with pytest.raises(PackageError):
+        with load_project(original, replace(Limits(), sidecar_bytes=32)):
+            pytest.fail("invalid sidecar admitted")
+    assert list(temp_root.iterdir()) == []
+
+
+@pytest.mark.parametrize("pages", [0, 201])
+def test_pdf_page_count_bounds_are_enforced(tmp_path: Path, pages: int) -> None:
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    for _ in range(pages):
+        writer.add_blank_page(width=320, height=180)
+    writer.write(pdf)
+    with pytest.raises(PackageError, match="page limit"):
+        with load_project(pack_package(pdf)):
+            pytest.fail("out-of-bounds PDF admitted")
+
+
+@pytest.mark.parametrize("rotation, unit", [(90, 2), (270, 1)])
+def test_page_geometry_accounts_for_rotation_and_user_units(
+    tmp_path: Path, rotation: int, unit: int
+) -> None:
+    from pypdf.generic import NameObject, NumberObject
+
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=320, height=180)
+    page.rotate(rotation)
+    page[NameObject("/UserUnit")] = NumberObject(unit)
+    writer.write(pdf)
+    with load_project(pack_package(pdf)) as project:
+        geometry = project.data["pages"][0]
+        assert geometry["width"] == 180 * unit
+        assert geometry["height"] == 320 * unit
+        assert geometry["rotation"] == rotation
+
+
+@pytest.mark.parametrize("kind", ["rotation", "unit", "empty-crop"])
+def test_invalid_page_geometry_is_rejected(tmp_path: Path, kind: str) -> None:
+    from pypdf.generic import NameObject, NumberObject
+
+    pdf = tmp_path / "talk.pdf"
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=320, height=180)
+    if kind == "rotation":
+        page[NameObject("/Rotate")] = NumberObject(45)
+    elif kind == "unit":
+        page[NameObject("/UserUnit")] = NumberObject(0)
+    else:
+        page.cropbox.lower_left = (400, 200)
+        page.cropbox.upper_right = (500, 300)
+    writer.write(pdf)
+    with pytest.raises(PackageError, match="invalid spatial page geometry"):
+        with load_project(pack_package(pdf)):
+            pytest.fail("invalid geometry admitted")

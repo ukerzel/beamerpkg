@@ -121,3 +121,107 @@
   S0–S4 is complete; commit/push final S4 slice, then stop for human walkthrough
   and the next product decision. Full editor/save and lecturer parity remain
   deferred rather than silently claimed.
+
+## 2026-11-03 — Code review and release preparation
+
+User requested a code/bug/test review with coverage before another release.
+Reviewed the Python package/CLI, spatial admission/model/server and browser
+model/navigation/rendering/media code. No release, tag, push or version change.
+
+Findings fixed, ordered by impact:
+
+- **High: packing could overwrite an input file.** `--output talk.pdf`, a media
+  filename, the notes file or asset-list file replaced that input with a ZIP.
+  Reject output/input identity before writing; regressions assert original bytes.
+- **Medium: packing could produce an archive its own validator rejected.**
+  Notes/media/source names could collide, including file/directory prefixes.
+  Validate all member paths together before replacing the destination. Failed
+  writes also retain the previous bundle and remove temporary output.
+- **Medium: manifest paths and ZIP entries were validated inconsistently.**
+  Noncanonical paths could pass hash validation and later trigger `KeyError` or
+  extraction errors. Duplicate file records and file/directory conflicts could
+  pass inspection; ZIP symlinks passed inspection but failed extraction. Require
+  canonical unique paths without file/directory conflicts, and reject symlinks
+  during inspection. Boolean schemas and noninteger sizes are rejected.
+- **Medium: explicit notes with a different filename were invisible to pdfpc.**
+  Store selected notes under the PDF stem plus `.pdfpc`. A relocated package
+  regression checks notes/source bytes through presenter invocation and spatial
+  loading. Documented this behavior in README.
+- **Medium: media paths accepted by packing could fail spatial loading.**
+  Normalize harmless `./` and repeated separators consistently, retaining the
+  unchanged PDF and canonical packaged asset. Both routes are covered.
+- **Medium: PDF `/ShowControls false` became `true`.** pypdf's `BooleanObject`
+  is truthy even when its `.value` is false. Decode that value explicitly; test
+  both true and false.
+- **Medium: malformed inputs could escape as tracebacks.** Empty normalized
+  paths such as `.`, NUL-containing names, malformed annotation arrays, oversized
+  sidecar integers, deeply nested manifest JSON, encrypted ZIP entries and
+  unsupported compression now fail as controlled package/media errors.
+
+Added 54 Python test cases, including the regressions above, tampered hashes,
+invalid manifests, undeclared/missing members, destination symlink escapes,
+atomic-write failure, file-spec dictionaries and CLI reports/errors. Retained
+failing-before evidence in `build/release-review/regressions-before.log` and
+`media-regressions-before.log`.
+
+Validation:
+
+- 122 Python tests and 27 Playwright tests pass on Python 3.14.4/Chromium.
+- Statement coverage: 85.68% -> 90.82%; branch coverage: 72.70% -> 80.49%;
+  combined coverage: 81.85% -> 87.74%. Coverage measures Python only.
+- Ruff, mypy (seven source files), Poetry lock validation, TypeScript and
+  frontend production build pass.
+- Rebuilt real demo/wrapperless/science/stress fixtures. Local wheel and sdist
+  include offline frontend resources, notices and the TeX helper.
+- Fresh offline installation outside the checkout passes route isolation,
+  relocated presenter invocation, browser playback/seeking through HTTP 206,
+  paused restore, unchanged archive and private temporary-file cleanup. The
+  installed runtime PATH has no Node/npm/pdfpc; the browser driver runs outside
+  that runtime. No external browser requests or page errors occurred.
+- Receipts, logs, HTML/XML/JSON coverage and distribution hashes are under
+  `build/release-review/`; the installed proof also writes
+  `build/spatial-evidence/s4/distribution.json`.
+
+The first installed proof omitted `PLAYWRIGHT_BROWSERS_PATH` and could not find
+Chromium. Its failure log is retained; rerunning with the documented browser
+path passed. An overlapping frontend invocation hit the existing development
+port; subsequent isolated frontend runs passed. These are environment/setup
+failures, not product regressions.
+
+Release boundaries: version remains 1.2.0; builds in `build/spatial-dist` are
+validation artifacts, not a new release. Version/metadata selection and final
+release build/tag/publication remain. Live pdfpc rendering, Python 3.11–3.13
+and other browsers were not requalified. Python coverage still leaves parser,
+resource-limit and environment-error branches unexercised; frontend statement
+coverage was not collected. User authorized committing/pushing the reviewed
+fixes. Preserved the unrelated untracked `examples/wrapperless.pdf` and existing
+immutable spatial receipts.
+
+### Follow-up: targeted coverage before commit/push
+
+The user requested further coverage rather than deferring it. Added 86 more
+Python cases for source symlinks at each depth, source-root escapes, invalid
+pack inputs and manifest collections, unsupported movie/launch options,
+unknown playback flags, layout references/limits/world views, growing archives,
+invalid sidecars and cleanup, page counts/rotation/UserUnit, HTTP methods,
+ranges and invalid targets, presenter failure cleanup and browser fallback.
+
+This caught an additional bug: `--source linked/plot.png` accepted a symlinked
+parent even though selecting the link directly was rejected. Resolution could
+silently change the archived source path. Source selection now checks every
+input component for symlinks before collecting files. Retained the failing
+regression in `build/release-review/coverage-extension-package-before.log`.
+
+Final Python validation is **208 passed**. Statement coverage is **98.25%**,
+branch coverage **95.39%**, combined **97.40%**. These supersede the initial
+review's 122-test/87.74% totals above; the initial coverage and test receipt are
+retained separately. The spatial model has 100% measured statement/branch
+coverage. Remaining gaps are defensive checks and unusual parser/IO/resource
+failure paths; no artificial exclusions or coverage thresholds were added.
+
+Ruff, mypy, Poetry lock and diff checks pass. Frontend source/assets are
+unchanged from the passing 27-test/TypeScript/build check. Rebuilt wheel/sdist
+and refreshed the isolated installed-wheel proof for the final Python source.
+Publication/version boundaries and live-pdfpc/browser-matrix limitations above
+still apply. The user authorized committing and pushing the complete reviewed
+fix/test set; the unrelated PDF remains excluded.

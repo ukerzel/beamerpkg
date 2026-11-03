@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import stat
 import tempfile
@@ -44,14 +45,31 @@ def _safe_relative_path(raw: str) -> PurePosixPath:
     normalized = raw.strip().replace("\\", "/")
     if not normalized:
         raise PackageError("asset path is empty")
-    if "://" in normalized or normalized.lower().startswith("file:"):
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized):
         raise PackageError(f"remote or URI media references are unsupported: {raw!r}")
     path = PurePosixPath(normalized)
-    if path.is_absolute() or ".." in path.parts or "." in path.parts:
+    if (
+        not path.parts
+        or path.is_absolute()
+        or ".." in path.parts
+        or any(ord(c) < 32 for c in normalized)
+    ):
         raise PackageError(f"asset path must be a clean relative path: {raw!r}")
-    if path.parts[0].endswith(":"):
-        raise PackageError(f"asset path must not use a drive prefix: {raw!r}")
     return path
+
+
+def _validate_member_paths(names: list[str]) -> None:
+    """Require unique canonical file paths with no file/directory collisions."""
+    seen: set[str] = set()
+    for name in names:
+        if _safe_relative_path(name).as_posix() != name:
+            raise PackageError(f"noncanonical package path: {name!r}")
+        if name in seen:
+            raise PackageError(f"duplicate package path collides: {name}")
+        seen.add(name)
+    for name in names:
+        if any(parent.as_posix() in seen for parent in PurePosixPath(name).parents):
+            raise PackageError(f"package file/directory path conflict: {name}")
 
 
 def read_asset_list(path: Path) -> tuple[PurePosixPath, ...]:
@@ -151,12 +169,14 @@ def _collect_source_files(
             raise PackageError(f"source input must be relative: {raw_input}")
 
         relative_input = _safe_relative_path(raw_input.as_posix())
-        candidate = source_root.joinpath(*relative_input.parts)
+        candidate = source_root
+        for part in relative_input.parts:
+            candidate = candidate / part
+            if candidate.is_symlink():
+                raise PackageError(f"source symlinks are not supported: {raw_input}")
 
         if not candidate.exists():
             raise PackageError(f"source input not found: {raw_input}")
-        if candidate.is_symlink():
-            raise PackageError(f"source symlinks are not supported: {raw_input}")
 
         if candidate.is_file():
             add_file(candidate)
@@ -205,14 +225,18 @@ def pack_package(
     for archive_path in asset_paths:
         archive_name = archive_path.as_posix()
         if archive_name in reserved:
-            raise PackageError(f"asset path collides with package metadata: {archive_name}")
+            raise PackageError(
+                f"asset path collides with package metadata: {archive_name}"
+            )
         source = root.joinpath(*archive_path.parts).resolve()
         try:
             source.relative_to(root)
         except ValueError as exc:
             raise PackageError(f"asset escapes root: {archive_name}") from exc
         if not source.is_file():
-            raise PackageError(f"asset not found: {archive_name} (resolved to {source})")
+            raise PackageError(
+                f"asset not found: {archive_name} (resolved to {source})"
+            )
         resolved_assets.append((archive_path, source))
 
     if notes is None:
@@ -226,7 +250,8 @@ def pack_package(
         _file_record(source, archive_path.as_posix())
         for archive_path, source in resolved_assets
     ]
-    notes_record = _file_record(notes, notes.name) if notes is not None else None
+    notes_name = pdf.with_suffix(".pdfpc").name
+    notes_record = _file_record(notes, notes_name) if notes is not None else None
     source_records = [
         _file_record(source, archive_path.as_posix())
         for archive_path, source in source_files
@@ -245,6 +270,21 @@ def pack_package(
         "source": source_record,
     }
 
+    records = _manifest_records(manifest)
+    _validate_member_paths([MANIFEST_NAME, *(record["path"] for record in records)])
+    inputs = [
+        pdf,
+        *(source for _, source in resolved_assets),
+        *(source for _, source in source_files),
+    ]
+    if notes is not None:
+        inputs.append(notes.resolve())
+    if asset_list is not None:
+        inputs.append(asset_list.resolve())
+    inputs.append(pdf.with_suffix(ASSET_LIST_SUFFIX))
+    if output in inputs:
+        raise PackageError(f"output package would overwrite an input file: {output}")
+
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         prefix=f".{output.name}.", suffix=".tmp", dir=output.parent, delete=False
@@ -254,14 +294,16 @@ def pack_package(
     try:
         # Media and PDFs are already compressed. ZIP_STORED keeps packaging fast and
         # preserves media bytes exactly rather than spending CPU for negligible gain.
-        with zipfile.ZipFile(temporary_output, "w", compression=zipfile.ZIP_STORED) as zf:
+        with zipfile.ZipFile(
+            temporary_output, "w", compression=zipfile.ZIP_STORED
+        ) as zf:
             zf.writestr(
                 MANIFEST_NAME,
                 json.dumps(manifest, indent=2, sort_keys=True) + "\n",
             )
             zf.write(pdf, arcname=pdf.name)
             if notes is not None:
-                zf.write(notes, arcname=notes.name)
+                zf.write(notes, arcname=notes_name)
             for archive_path, source in resolved_assets:
                 zf.write(source, arcname=archive_path.as_posix())
             for archive_path, source in source_files:
@@ -281,13 +323,16 @@ def _load_manifest(zf: zipfile.ZipFile) -> dict[str, Any]:
         raise PackageError(f"package is missing {MANIFEST_NAME}") from exc
     try:
         manifest = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+    except (UnicodeDecodeError, ValueError, RecursionError) as exc:
         raise PackageError("manifest.json is not valid UTF-8 JSON") from exc
     if not isinstance(manifest, dict):
         raise PackageError("manifest.json must contain a JSON object")
-    if manifest.get("schema_version") != SCHEMA_VERSION:
+    if (
+        type(manifest.get("schema_version")) is not int
+        or manifest["schema_version"] != SCHEMA_VERSION
+    ):
         raise PackageError(
-            "unsupported schema_version: " f"{manifest.get('schema_version')!r}"
+            f"unsupported schema_version: {manifest.get('schema_version')!r}"
         )
     return manifest
 
@@ -347,20 +392,30 @@ def inspect_package(package: Path) -> dict[str, Any]:
             names = zf.namelist()
             if len(names) != len(set(names)):
                 raise PackageError("package contains duplicate ZIP member names")
+            _validate_member_paths(names)
+            if any(_is_zip_symlink(info) for info in zf.infolist()):
+                raise PackageError("ZIP symlink entries are not allowed")
 
             records = _manifest_records(manifest)
-            expected = {MANIFEST_NAME}
+            paths: list[str] = []
             for record in records:
-                archive_path = record.get("path")
-                if not isinstance(archive_path, str):
+                path = record.get("path")
+                if not isinstance(path, str):
                     raise PackageError("manifest file record is missing string path")
-                safe_path = _safe_relative_path(archive_path).as_posix()
+                paths.append(path)
+            _validate_member_paths([MANIFEST_NAME, *paths])
+            expected = {MANIFEST_NAME}
+            for record, safe_path in zip(records, paths, strict=True):
                 expected.add(safe_path)
                 try:
                     payload = zf.read(safe_path)
                 except KeyError as exc:
-                    raise PackageError(f"package is missing declared file: {safe_path}") from exc
-                if record.get("size") != len(payload):
+                    raise PackageError(
+                        f"package is missing declared file: {safe_path}"
+                    ) from exc
+                if type(record.get("size")) is not int or record["size"] != len(
+                    payload
+                ):
                     raise PackageError(f"size mismatch for {safe_path}")
                 digest = hashlib.sha256(payload).hexdigest()
                 if record.get("sha256") != digest:
@@ -369,7 +424,8 @@ def inspect_package(package: Path) -> dict[str, Any]:
             unexpected = set(names) - expected
             if unexpected:
                 raise PackageError(
-                    "package contains undeclared files: " + ", ".join(sorted(unexpected))
+                    "package contains undeclared files: "
+                    + ", ".join(sorted(unexpected))
                 )
 
             presentation_path = manifest["presentation"]["path"]
@@ -377,6 +433,8 @@ def inspect_package(package: Path) -> dict[str, Any]:
                 raise PackageError("declared presentation does not look like a PDF")
     except zipfile.BadZipFile as exc:
         raise PackageError(f"not a valid ZIP package: {package}") from exc
+    except (OSError, RuntimeError, NotImplementedError) as exc:
+        raise PackageError(f"cannot read ZIP package: {exc}") from exc
 
     return {"ok": True, "manifest": manifest}
 
@@ -396,13 +454,17 @@ def extract_package(package: Path, destination: Path) -> dict[str, Any]:
     with zipfile.ZipFile(package, "r") as zf:
         for info in zf.infolist():
             if _is_zip_symlink(info):
-                raise PackageError(f"ZIP symlink entries are not allowed: {info.filename}")
+                raise PackageError(
+                    f"ZIP symlink entries are not allowed: {info.filename}"
+                )
             archive_path = _safe_relative_path(info.filename)
             target = destination.joinpath(*archive_path.parts).resolve()
             try:
                 target.relative_to(destination)
             except ValueError as exc:
-                raise PackageError(f"ZIP member escapes destination: {info.filename}") from exc
+                raise PackageError(
+                    f"ZIP member escapes destination: {info.filename}"
+                ) from exc
             target.parent.mkdir(parents=True, exist_ok=True)
             with zf.open(info, "r") as source, target.open("wb") as sink:
                 shutil.copyfileobj(source, sink)

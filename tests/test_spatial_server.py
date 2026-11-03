@@ -61,6 +61,10 @@ def request(server, path="/runtime/asset-0", method="GET", **headers):
         ("bytes=-0", 416, b"", "bytes */10"),
         ("bytes=4-1", 416, b"", "bytes */10"),
         ("bytes=1-2,5-6", 416, b"", "bytes */10"),
+        ("bytes=-30", 206, b"0123456789", "bytes 0-9/10"),
+        ("bytes=-", 416, b"", "bytes */10"),
+        ("items=0-1", 416, b"", "bytes */10"),
+        ("bytes=" + "9" * 129 + "-", 416, b"", "bytes */10"),
     ],
 )
 def test_byte_ranges(server, raw, expected, body, content_range):
@@ -174,3 +178,37 @@ def test_runtime_files_are_served_when_the_temp_dir_is_a_symlink(
             instance.server_close()
             worker.join(timeout=3)
     assert status == 200 and body.startswith(b"%PDF")
+
+
+@pytest.mark.parametrize("method", ["POST", "DELETE", "PATCH", "OPTIONS"])
+def test_all_mutation_methods_are_rejected(server, method):
+    status, headers, body = request(server, method=method)
+    assert status == 405 and body == b""
+    assert headers["Allow"] == "GET, HEAD"
+
+
+def test_absolute_targets_invalid_encoding_and_removed_files_are_not_served(
+    server, tmp_path: Path
+):
+    for target in ("http://127.0.0.1/", "/%ff", "http://[invalid/"):
+        assert request(server, target, Host=f"127.0.0.1:{server.server_port}")[0] == 404
+    (tmp_path / "clip.mp4").unlink()
+    assert request(server)[0] == 404
+
+
+def test_head_project_and_empty_file_ranges(server, tmp_path: Path):
+    status, headers, body = request(server, "/api/project", method="HEAD")
+    assert status == 200 and body == b"" and int(headers["Content-Length"]) > 0
+    (tmp_path / "clip.mp4").write_bytes(b"")
+    status, headers, body = request(server)
+    assert status == 200 and body == b"" and headers["Content-Length"] == "0"
+    status, headers, body = request(server, Range="bytes=0-")
+    assert status == 416 and headers["Content-Range"] == "bytes */0"
+
+
+def test_missing_frontend_has_an_actionable_error(tmp_path: Path):
+    from beamerpkg.package import PackageError
+
+    project = SpatialProject(tmp_path / "talk.pdf", {}, {"placements": []})
+    with pytest.raises(PackageError, match="frontend missing"):
+        make_server(project, tmp_path / "missing")

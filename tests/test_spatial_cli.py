@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -90,3 +91,30 @@ def test_interrupt_closes_server_before_extracted_files_are_removed(
     assert observed["closed_while_alive"] is True
     assert not observed["pdf"].exists()
     assert pdf.exists() and package.exists()
+
+
+def test_browser_launch_failure_keeps_manual_url_and_closes_server(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    observed = []
+
+    @contextmanager
+    def load(package):
+        yield SimpleNamespace()
+
+    def serve(**kwargs):
+        raise KeyboardInterrupt
+
+    server = SimpleNamespace(
+        server_port=1234,
+        serve_forever=serve,
+        server_close=lambda: observed.append("closed"),
+    )
+    monkeypatch.setattr(spatial_server, "load_project", load)
+    monkeypatch.setattr(spatial_server, "make_server", lambda _: server)
+    monkeypatch.setattr(spatial_server.webbrowser, "open", lambda _: False)
+    assert spatial_server.run_spatial(tmp_path / "talk.beamerpkg") == 0
+    captured = capsys.readouterr()
+    assert "http://127.0.0.1:1234/" in captured.out
+    assert "open the displayed local URL manually" in captured.err
+    assert observed == ["closed"]

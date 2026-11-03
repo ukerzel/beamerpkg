@@ -77,6 +77,21 @@ separator-stripped form produced by `poetry run`.
 
 ## Next
 
+2026-11-03 release-preparation review (current user request): fixed input-file
+overwrite, archive member collisions/noncanonical manifest paths, explicit notes
+naming, malformed-input exceptions, PDF false-controls decoding, and media path
+normalization between routes. The user then requested additional coverage before
+commit/push. This caught and fixed selection through a symlinked source parent.
+Added 140 Python cases in total: 208 Python and 27 frontend tests pass. Python
+statement coverage is 98.25%, branch coverage 95.39%, combined 97.40% (baseline
+combined 81.85%). Ruff, mypy, Poetry lock, TypeScript/build,
+wheel/sdist inventory and isolated installed-wheel route proof pass. Detailed
+findings and evidence paths are in `WORKLOG.md`. User authorized commit/push of
+these reviewed fixes. Version remains 1.2.0 and builds are local validation
+artifacts. Version selection, release metadata, tagging and publication remain
+for the release step. No new live pdfpc or Python-version/browser-matrix
+qualification is claimed.
+
 2026-11-03: the spatial route was merged into `main` at the user's instruction,
 after the user's walkthrough. The pre-merge audit fixes are in `b995141`. Final
 check: 68 Python and 27 frontend tests, Ruff, mypy, TypeScript and the

@@ -49,8 +49,8 @@ def _fields(value: Any, required: set[str], optional: set[str] | None = None) ->
 def _number(value: Any, low: float, high: float, *, positive: bool = False) -> None:
     if (
         type(value) not in (int, float)
-        or not math.isfinite(value)
         or not low <= value <= high
+        or not math.isfinite(value)
         or (positive and value <= 0)
     ):
         _fail("number outside finite bounds")

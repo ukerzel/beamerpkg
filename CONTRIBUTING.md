@@ -21,5 +21,16 @@ poetry run ruff check .
 poetry run mypy src
 ```
 
+For a release review, include branch coverage and retain a browsable report:
+
+```bash
+poetry run pytest --cov=beamerpkg --cov-branch --cov-report=term-missing \
+  --cov-report=html:build/release-review/coverage-html
+```
+
+This measures Python coverage. Run the spatial frontend tests and the
+installed-distribution proof separately as described in
+`frontend/spatial/README.md` and `tools/check_spatial_distribution.py`.
+
 The end-to-end presentation experiment additionally requires TeX Live, ffmpeg,
 and pdfpc. See `docs/MVP.md`.
