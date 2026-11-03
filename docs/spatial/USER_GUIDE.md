@@ -1,7 +1,7 @@
 # The spatial route
 
-Every `.beamerpkg` can be presented through two equal routes: pdfpc and the
-spatial canvas. This guide covers the spatial one. It is on `main` (merged
+Every `.beamerpkg` can be presented through two first-class routes: pdfpc,
+usually the main one, and the spatial canvas. Neither requires the other. This guide covers the spatial one. It is on `main` (merged
 2026-11-03) but not yet in a PyPI release; the published 1.2.0 package has
 the pdfpc route only.
 

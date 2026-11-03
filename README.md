@@ -1,8 +1,9 @@
 # beamerpkg
 
 `beamerpkg` makes multimedia Beamer presentations portable without replacing
-Beamer's rendering model. One archive can be presented through either of two
-equal routes, and every package must work on both.
+Beamer's rendering model. One archive can be presented through two first-class
+routes: pdfpc, usually the main one, and a spatial canvas. Neither route requires
+the other, and every package must work on both.
 
 ```text
 Beamer -> ordinary PDF + external MP4 files -> one relocatable .beamerpkg
@@ -34,7 +35,8 @@ PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 
 ### Two presentation routes
 
-The same `.beamerpkg` supports both routes, and they are equals:
+The same `.beamerpkg` supports both routes. Both are first-class, though pdfpc
+will usually be the main one:
 
 ```bash
 beamerpkg present talk.beamerpkg   # pdfpc: two screens, speaker notes, timer
