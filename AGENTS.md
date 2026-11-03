@@ -66,4 +66,5 @@ The routes stay independent at runtime: `pack`, `inspect`, and `present` never
 use spatial metadata, browser tooling, or spatial initialization, and `spatial`
 never needs pdfpc. Still out of scope without a new recorded requirement:
 a full editor, a writable API, a custom PDF or video renderer, a transcoder, an
-archive schema change, and a release.
+archive schema change, and any further release. The user explicitly authorized
+the 1.3.0 version update, GitHub tag and PyPI publication on 2026-11-03.

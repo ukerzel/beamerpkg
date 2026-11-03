@@ -298,3 +298,23 @@ Local receipts: `build/release-review/cold-read-packaging.json`,
 `cold-read-frontend-tests.log` and `cold-read-installed-proof.log`.
 The user-authorized documentation commit excludes the unrelated
 `examples/wrapperless.pdf` and generated build artifacts.
+
+## 2026-11-03 — Release 1.3.0
+
+User explicitly authorized version 1.3.0, the GitHub tag and PyPI publication.
+Updated both version fields and the current README/guide/status wording; the
+v1 archive schema and existing route behavior remain unchanged. Release checks
+and artifacts are retained under `build/release-1.3.0`, with final wheel/sdist
+copied by exact filename to `dist/`. Older published artifacts and the unrelated
+untracked example PDF are preserved. Publication completion will be recorded
+after the tag and PyPI file hashes are verified remotely.
+
+Final 1.3.0 validation passes: 208 Python tests, 27 frontend tests, Ruff, mypy,
+Poetry lock and frontend production build; strict Twine checks; sdist rebuild
+without Node with all 219 wheel members byte-identical; isolated installed-wheel
+route/browser/cleanup proof. Both the installed proof and local packaging
+receipt agree on the final hashes. Coverage remains 98.25% statements / 95.39%
+branches. Release bytes in `dist/` match `build/release-1.3.0/packaging.json`.
+Proceeding with the release commit, annotated tag and upload of the exact two
+1.3.0 filenames. No source, media, PDF rendering or runtime dependency change
+is part of the version bump.

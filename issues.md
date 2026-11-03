@@ -13,7 +13,9 @@ and 27 frontend tests passing. The subsequent release-preparation review and
 coverage expansion were pushed as `f1db522`: 208 Python and 27 frontend tests,
 98.25% statement / 95.39% branch coverage, Ruff, mypy, lock, TypeScript/build
 and installed-wheel proof pass. The documentation verification is complete;
-see [WORKLOG](WORKLOG.md). No further implementation rung is active.
+see [WORKLOG](WORKLOG.md). User authorization now covers release 1.3.0,
+the GitHub tag and PyPI publication. No further feature implementation rung
+is active; release execution is tracked in `TASK_STATE.md`.
 
 ## Historical execution record (2026-11-01–02)
 

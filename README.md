@@ -33,10 +33,10 @@ Version 1.2.0 made media optional. A PDF without movie references packs as
 PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 `assets` list.
 
-The spatial route was merged into `main` on 2026-11-03. The checkout also
-contains the subsequent packaging/media fixes and validation work. The next
-release is being prepared; [PyPI 1.2.0](https://pypi.org/project/beamerpkg/1.2.0/)
-contains the pdfpc route only.
+Version 1.3.0 adds the spatial presentation route, bundled offline browser
+resources, and the packaging/media fixes described below. The pdfpc route and
+v1 archive format remain supported. See the
+[1.3.0 tag](https://github.com/ukerzel/beamerpkg/tree/v1.3.0).
 
 ### Two presentation routes
 
@@ -102,8 +102,9 @@ python -m pip install beamerpkg
 beamerpkg present talk.beamerpkg
 ```
 
-The published 1.2.0 release supports pdfpc. To use the spatial route before the
-next release, use a checkout or a locally built wheel as described below.
+Version 1.3.0 includes both presentation routes. Use
+`beamerpkg spatial talk.beamerpkg` for the spatial viewer; no Node/npm is
+needed when installing the published wheel.
 
 ## Install for development
 

@@ -2,9 +2,11 @@
 
 beamerpkg provides two first-class routes: pdfpc, usually the main one, and the
 spatial canvas. Neither requires the other. This guide covers the spatial one
-and its support limits. It is on `main` (merged
-2026-11-03) but not yet in a PyPI release; the published 1.2.0 package has
-the pdfpc route only.
+and its support limits. The spatial route is included in version 1.3.0,
+following its merge into `main` on 2026-11-03. Version 1.2.0 had the pdfpc route only.
+
+Install the released package with `python -m pip install beamerpkg`. Its wheel
+includes the browser app and local resources; the setup below is for development.
 
 ## Choose the route per talk
 
@@ -279,9 +281,9 @@ Node/npm/pdfpc from that environment's PATH, relocates the archive/layout, and
 drives the installed server using an external test browser. Non-loopback
 browser requests are blocked. This is not OS network isolation.
 
-Local validation builds stay under `build/spatial-dist`; do not overwrite release
-artifacts in `dist`. The prototype still uses package version 1.2.0 for local
-testing. These files are not a new public release.
+Local validation builds stay under `build/spatial-dist`. Final 1.3.0 release
+artifacts are retained separately in `dist/`; publish only the exact wheel and
+sdist validated for the release, rather than unrelated files in that directory.
 
 ## Human walkthrough before relying on it for a talk
 
