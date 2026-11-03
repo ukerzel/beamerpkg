@@ -46,9 +46,23 @@ test('backup clusters are off the tour but reachable from finale, views and path
         await page.getByRole('button', { name: 'Overview', exact: true }).click();
         await page.getByRole('button', { name: 'Go to step 15', exact: true }).click();
         await expect(position).toContainText('guided step 15/15 canvas');
-        const frame = (await page.getByTestId('object-b-paths').boundingBox())!;
+        // Arrows on a backup frame step through its part, not back to the tour.
+        const frame = (await page.getByTestId('object-a-potential').boundingBox())!;
         await page.mouse.click(frame.x + frame.width * 0.2, frame.y + frame.height * 0.2);
-        await expect(position).toContainText(' b-paths ');
+        await expect(position).toContainText(' a-potential ');
+        await expect(page.getByText(/continues on the backup path/)).toBeVisible();
+        await page.keyboard.press('ArrowRight');
+        await expect(position).toContainText('guided step 4/13 a-expansion');
+        await page.keyboard.press('ArrowRight');
+        await expect(position).toContainText('guided step 5/13 a-numbers');
+        await page.keyboard.press('ArrowLeft');
+        await expect(position).toContainText('guided step 4/13 a-expansion');
+        await page.getByRole('button', { name: 'Back to tour · step 15', exact: true }).click();
+        await expect(position).toContainText('guided step 15/15 canvas');
+        // A frame on the tour is still a plain detour: → resumes the tour. The
+        // locator click waits until the restored camera has settled.
+        await page.getByTestId('object-try').click({ position: { x: 25, y: 19 } });
+        await expect(position).toContainText(' try ');
         await page.keyboard.press('ArrowRight');
         await expect(position).toContainText('guided step 15/15 canvas');
 

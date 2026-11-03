@@ -103,3 +103,72 @@ test('overview step jump enters guided step and drops detours; invalid index is 
     for (const id of ['3', '-1', '1.5', 'x'])
         expect(navigate(layout, state, { ...context, type: 'step', id })).toBe(state);
 });
+test('arrows on a frame off the current path follow the path holding it; Esc returns home', () => {
+    // A backup frame 'x' (two overlays) and 'y' are off 'main'; 'backup' holds
+    // both and is preferred over the longer 'deck', which holds everything.
+    const side: Layout = {
+        ...layout,
+        frames: [...layout.frames, { id: 'h', page_indices: [4, 5] }],
+        objects: [
+            ...layout.objects,
+            { id: 'x', frame_id: 'h', x: 0, y: 900, width: 480 },
+            { id: 'y', frame_id: 'g', x: 600, y: 900, width: 480 },
+        ],
+        viewpoints: [
+            ...layout.viewpoints,
+            { id: 'xv', target: { kind: 'object', object_id: 'x', region: [0, 0, 1, 1] } },
+            { id: 'yv', target: { kind: 'object', object_id: 'y', region: [0, 0, 1, 1] } },
+        ],
+        paths: [
+            ...layout.paths,
+            {
+                id: 'deck',
+                steps: ['frame', 'other', 'yv', 'xv'].map((v) => ({
+                    id: `d-${v}`,
+                    viewpoint_id: v,
+                    overlay_policy: 'all' as const,
+                })),
+            },
+            {
+                id: 'backup',
+                steps: ['xv', 'yv'].map((v) => ({
+                    id: `b-${v}`,
+                    viewpoint_id: v,
+                    overlay_policy: 'all' as const,
+                })),
+            },
+        ],
+    };
+    let state = navigate(side, initial(side), { ...context, type: 'next' });
+    expect(state.overlays.a).toBe(1);
+    state = navigate(side, state, { ...context, type: 'focus', id: 'xv' });
+    const request = state.cameraRequest;
+    state = navigate(side, state, { ...context, type: 'next' });
+    expect([state.pathId, state.mode, state.viewId, state.overlays.x]).toEqual([
+        'backup',
+        'guided',
+        'xv',
+        1,
+    ]);
+    expect(state.cameraRequest).toBeGreaterThan(request);
+    state = navigate(side, state, { ...context, type: 'next' });
+    expect([state.step, state.viewId]).toEqual([1, 'yv']);
+    state = navigate(side, state, { ...context, type: 'previous' });
+    expect([state.step, state.overlays.x]).toEqual([0, 1]);
+    // An overview detour on the side trip returns to it, keeping the way home.
+    state = navigate(side, state, { ...context, type: 'overview' });
+    state = navigate(side, state, { ...context, type: 'escape' });
+    expect([state.pathId, state.mode, state.viewId]).toEqual(['backup', 'guided', 'xv']);
+    state = navigate(side, state, { ...context, type: 'escape' });
+    expect([state.pathId, state.mode, state.step, state.overlays.a]).toEqual([
+        'main',
+        'guided',
+        0,
+        1,
+    ]);
+    expect(state.home).toBeNull();
+    // Frames on the current path keep the plain detour: arrows resume the tour.
+    state = navigate(side, state, { ...context, type: 'focus', id: 'other' });
+    state = navigate(side, state, { ...context, type: 'next' });
+    expect([state.pathId, state.mode, state.step]).toEqual(['main', 'guided', 0]);
+});

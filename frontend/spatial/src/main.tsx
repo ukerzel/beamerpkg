@@ -19,7 +19,7 @@ import {
     type Project,
     type View,
 } from './model';
-import { initial, navigate, type Action, type Bookmark, type Camera } from './navigation';
+import { initial, navigate, sidePath, type Action, type Bookmark, type Camera } from './navigation';
 import { openPdf, rectangle } from './pdf';
 import { Renderer, thumbnailBudget } from './rendering';
 import { MediaController } from './media';
@@ -884,6 +884,9 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
     const quiet = idle && state.mode === 'guided' && !viewsOpen && !help;
     const showMinimap = minimapPref ?? state.mode !== 'guided';
     const anchorStep = state.anchor ? state.anchor.step + 1 : null;
+    // Exploring a frame that only another path holds: arrows continue there.
+    const aside =
+        state.mode === 'exploring' ? sidePath(project.layout, state.pathId, state.viewId) : null;
     // With no single frame in focus (overview, or a guided whole-canvas step such
     // as a finale), the route is shown and a click on a frame flies into it.
     const canvasView = !activeObject;
@@ -1101,9 +1104,11 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                             </>
                         ) : null}
                     </div>
-                    {(state.mode !== 'guided' || canvasView) && (
+                    {(state.mode !== 'guided' || canvasView || state.home) && (
                         <div className="detour">
-                            {state.mode === 'guided' ? (
+                            {state.mode === 'guided' && state.home ? (
+                                <span>On the {state.pathId} path · ← → step through it</span>
+                            ) : state.mode === 'guided' ? (
                                 <span>
                                     {lastStep ? 'End of tour · ' : ''}Click a number to jump · a
                                     frame to look closer
@@ -1113,10 +1118,18 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                             ) : (
                                 <span>
                                     Exploring
-                                    {anchorStep ? ` · → resumes step ${anchorStep}` : ''}
+                                    {aside
+                                        ? ` · → continues on the ${aside} path`
+                                        : anchorStep
+                                          ? ` · → resumes step ${anchorStep}`
+                                          : ''}
                                 </span>
                             )}
-                            {state.mode === 'exploring' && state.anchor ? (
+                            {state.mode === 'guided' && state.home ? (
+                                <button onClick={() => act('escape')}>
+                                    Back to {state.home.pathId} · step {state.home.step + 1}
+                                </button>
+                            ) : state.mode === 'exploring' && state.anchor && !aside ? (
                                 <button onClick={() => act('next')}>Resume</button>
                             ) : state.history.length ? (
                                 <button onClick={() => act('escape')}>Back</button>
@@ -1200,7 +1213,7 @@ function Viewer({ project, pdf }: { project: Project; pdf: PDFDocumentProxy }) {
                         </button>
                         <button
                             onClick={() => act('escape')}
-                            disabled={!state.history.length}
+                            disabled={!state.history.length && !state.home}
                             aria-label="Return"
                             data-tip="Return  Esc"
                         >

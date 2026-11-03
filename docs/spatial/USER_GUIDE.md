@@ -44,7 +44,11 @@ B container, C spatial internals), each a dark divider with the part letter
 plus three frames. On the canvas they form a band below the talk, one tight
 2×2 cluster per part. Frames within a part almost touch, while parts sit far
 apart from each other and from the talk. The tour never enters them but its
-finale shows them, and a click flies into any backup frame. For questions, open
+finale shows them, and a click flies into any backup frame. From there → and
+← step through the backup (the dock's path menu shows `backup`); Esc or
+"Back to tour" returns to where you left the tour. In general, arrows on a
+frame that the current path does not visit follow the shortest path that does.
+A frame on the current path stays a plain detour, where → resumes. For questions, open
 **Views** and pick `backup-physics`, `backup-container` or `backup-canvas` (the
 drawer shows each cluster as a miniature), or switch to the `backup` path. In
 pdfpc the backup frames come after "Try it": the frame counter and progress bar
