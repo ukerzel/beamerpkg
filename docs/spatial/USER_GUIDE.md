@@ -1,18 +1,20 @@
-# Try the first spatial MVP
+# The spatial route
 
-This prototype lives on `feat/spatial-prototype`. The published 1.2.0 package
-and `main` retain the existing pdfpc workflow. No release or merge has been made.
+Every `.beamerpkg` can be presented through two equal routes: pdfpc and the
+spatial canvas. This guide covers the spatial one. It is on `main` (merged
+2026-11-03) but not yet in a PyPI release; the published 1.2.0 package has
+the pdfpc route only.
 
 ## Choose the route per talk
 
 ```bash
-beamerpkg present talk.beamerpkg       # existing pdfpc route
-beamerpkg spatial talk.beamerpkg       # optional spatial route
+beamerpkg present talk.beamerpkg       # pdfpc route
+beamerpkg spatial talk.beamerpkg       # spatial route
 ```
 
-Use either command, or both with one archive. Spatial mode needs a supported
-browser; pdfpc is not required for it. The existing route needs no browser,
-spatial layout, or frontend tooling.
+Use either command, or both with one archive. The spatial route needs a
+supported browser but no pdfpc. The pdfpc route needs no browser, spatial
+layout or frontend tooling.
 
 ## Try the demo talk spatially
 

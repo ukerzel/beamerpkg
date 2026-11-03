@@ -1,13 +1,16 @@
 # beamerpkg
 
 `beamerpkg` makes multimedia Beamer presentations portable without replacing
-Beamer's rendering model.
+Beamer's rendering model. One archive can be presented through either of two
+equal routes, and every package must work on both.
 
 ```text
 Beamer -> ordinary PDF + external MP4 files -> one relocatable .beamerpkg
                                                |
-                                               v
-                                   unpack temporarily + pdfpc
+                          +--------------------+--------------------+
+                          v                                         v
+            beamerpkg present (pdfpc)                beamerpkg spatial (canvas)
+            two screens, notes, timer                zoomable canvas in a browser
 ```
 
 Equations, TikZ, columns, backgrounds, arrows, Beamer overlays, fonts, and all
@@ -29,23 +32,27 @@ Version 1.2.0 makes media optional. A PDF without movie references packs as
 PDF-only (plus the `.pdfpc` notes and `--source` payload, if any), with an empty
 `assets` list.
 
-### Optional spatial route
+### Two presentation routes
 
-An optional, read-only spatial presentation route sits beside the existing
-pdfpc route:
+The same `.beamerpkg` supports both routes, and they are equals:
 
 ```bash
-beamerpkg present talk.beamerpkg   # existing pdfpc presentation
-beamerpkg spatial talk.beamerpkg   # optional local browser presentation
+beamerpkg present talk.beamerpkg   # pdfpc: two screens, speaker notes, timer
+beamerpkg spatial talk.beamerpkg   # spatial: the slides on a zoomable canvas
 ```
 
-Choose either route or both per talk. Spatial mode supports explicit overlay
-groups, whole-frame/detail viewpoints, guided paths, exploration/return, and
-the two existing packaged-video forms. A saved spatial arrangement uses an
-adjacent `talk.spatial.json`; the v1 archive remains unchanged. There is no
-graphical editor or write API in this first MVP.
+Pick a route per talk, or use both with the same archive. Neither depends on
+the other: `present` needs no browser, layout or frontend tooling, and `spatial`
+needs no pdfpc. A change to packing, the archive or media discovery has to keep
+both routes working.
 
-It is not yet in a PyPI release. From a checkout, build the pinned frontend
+The spatial route shows the unchanged PDF on a canvas. It supports explicit
+overlay groups, whole-frame and detail viewpoints, guided paths, exploring and
+returning, and both packaged-video forms. A spatial arrangement lives beside the
+archive in `talk.spatial.json`; the archive format is the same for both routes.
+Spatial is read-only for now: there is no graphical editor or write API yet.
+
+The spatial route is not yet in a PyPI release. From a checkout, build the pinned frontend
 (`cd frontend/spatial && npm ci && npm run build`) before using `spatial`.
 Built wheels include its offline assets and need no end-user Node/npm or pdfpc.
 `examples/build_demo.sh` builds the demo talk for both routes. See the
