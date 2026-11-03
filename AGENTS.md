@@ -11,7 +11,8 @@ without changing Beamer/PDF rendering.
 Use the smallest implementation sufficient to test that claim. Do not add HTML
 rendering, a custom PDF renderer, a custom video player, PDF annotation parsing,
 a GUI, transcoding, or generalized configuration unless a concrete MVP failure
-requires it.
+requires it. The optional spatial route below is the one accepted exception; its
+permissions do not extend to the pdfpc route.
 
 ## Development rules
 
@@ -40,18 +41,19 @@ requires it.
 Before extending scope, update `docs/MVP.md` with the concrete failure or
 requirement that justifies the extension.
 
-## Scoped spatial first MVP
+## Optional spatial route
 
-On `feat/spatial-prototype`, the user authorized execution through S0–S4 in
-`docs/SPATIAL_MVP.md` on 2026-11-01. `issues.md` Active Batch records progress.
-The concrete requirement is appended to `docs/MVP.md`; preserve its history.
-For this scope only, permit PDF.js browser rendering of unchanged PDF content,
-an opt-in `spatial` command, per-annotation placement inspection, a bounded
-read-only loopback server, and pinned local frontend dependencies/resources.
-These permissions do not change the existing pdfpc route or its acceptance.
+Built on `feat/spatial-prototype` through S0–S4 of `docs/SPATIAL_MVP.md`
+(authorized 2026-11-01). After the user's own walkthrough, the user merged it
+into `main` on 2026-11-03. The concrete requirements are recorded in
+`docs/MVP.md`; preserve its history. For this route only, the following are
+permitted: PDF.js browser rendering of unchanged PDF content, the opt-in
+`spatial` command, per-annotation placement inspection, a bounded read-only
+loopback server, and pinned local frontend dependencies and resources. These
+permissions do not change the existing pdfpc route or its acceptance.
 
-Keep existing `pack`, `inspect`, and `present` independent of spatial metadata,
-browser tooling, and spatial initialization. Spatial needs no pdfpc. No full
-editor, writable API, custom PDF/video renderer, transcoder, archive schema
-change, release, or merge to main. Run the ladder through passing rungs under
-the user's current authorization; stop at its material failure boundaries.
+Keep `pack`, `inspect`, and `present` independent of spatial metadata, browser
+tooling, and spatial initialization. Spatial needs no pdfpc. Each talk may use
+either route or both. Still out of scope without a new recorded requirement:
+a full editor, a writable API, a custom PDF or video renderer, a transcoder, an
+archive schema change, and a release.
